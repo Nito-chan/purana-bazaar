@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purana Bazaar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🛍️ Purana Bazaar</div>
+    <div style="display:flex;gap:18px;align-items:center;">
+
+    <div
+        class="notification-button"
+        onclick="openNotifications()"
+    >
+        🔔
+    </div>
+
+    <div
+        class="profile"
+        onclick="showProfile()"
+    >
+        👤
+    </div>
+
+</div>
+</header>
+
+<!-- SEARCH -->
+<div class="search-box">
+    🔍
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search products..."
+        oninput="searchProducts()"
+    >
+</div>
+
+<!-- CATEGORIES -->
+<section class="categories">
+
+    <div class="section-title">
+        <h2>Categories</h2>
+        <span onclick="showAllProducts()">See All</span>
+    </div>
+
+    <div class="category-list">
+
+        <div class="category-item" onclick="filterCategory('Mobile')">
+            <div class="category-icon">📱</div>
+            <span>Mobiles</span>
+        </div>
+
+        <div class="category-item" onclick="filterCategory('Laptop')">
+            <div class="category-icon">💻</div>
+            <span>Laptops</span>
+        </div>
+
+        <div class="category-item" onclick="filterCategory('Furniture')">
+            <div class="category-icon">🪑</div>
+            <span>Furniture</span>
+        </div>
+
+        <div class="category-item" onclick="filterCategory('Cycle')">
+            <div class="category-icon">🚲</div>
+            <span>Cycles</span>
+        </div>
+
+        <div class="category-item" onclick="filterCategory('Bike')">
+            <div class="category-icon">🏍️</div>
+            <span>Bikes</span>
+        </div>
+
+        <div class="category-item" onclick="filterCategory('Books')">
+            <div class="category-icon">📚</div>
+            <span>Books</span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- PRODUCTS -->
+<section class="products">
+
+    <div class="section-title">
+        <h2 id="productHeading">Nearby Items</h2>
+        <span onclick="showAllProducts()">See All</span>
+    </div>
+
+    <div id="userProducts" class="product-grid"></div>
+
+</section>
+
+
+<!-- SELL BUTTON -->
+<button class="sell-button" onclick="openSellPage()">
+    ＋ Sell Item
+</button>
+
+
+<!-- BOTTOM NAVIGATION -->
+<nav>
+
+    <div onclick="goHome()">
+        🏠
+        <span>Home</span>
+    </div>
+
+    <div onclick="showFavourites()">
+        ❤️
+        <span>Favourite</span>
+    </div>
+
+    <div onclick="openChat()">
+        💬
+        <span>Chat</span>
+    </div>
+
+    <div onclick="showProfile()">
+        👤
+        <span>Profile</span>
+    </div>
+
+</nav>
+
+<!-- ================= PROFESSIONAL HERO ================= -->
+
+<section class="market-hero">
+
+    <div class="hero-content">
+
+        <span class="hero-badge">
+            ♻️ Smart & Trusted Marketplace
+        </span>
+
+        <h1>
+            Buy Smart.<br>
+            Sell Easy.
+        </h1>
+
+        <p>
+            Discover quality second-hand products
+            near you at the best prices.
+        </p>
+
+        <button onclick="openSellPage()">
+            ＋ Sell Your Item
+        </button>
+
+    </div>
+
+    <div class="hero-icon">
+        🛍️
+    </div>
+
+</section>
+
+
+<!-- =================================================
+     PROFESSIONAL MARKETPLACE SECTIONS
+================================================= -->
+
+<section class="market-sections">
+
+    <!-- FEATURED -->
+    <div class="market-section-head">
+        <div>
+            <h2>⭐ Featured Items</h2>
+            <p>Handpicked products for you</p>
+        </div>
+
+        <span onclick="showFeaturedProducts()">
+            See All
+        </span>
+    </div>
+
+    <div
+        id="featuredProducts"
+        class="horizontal-products"
+    ></div>
+
+
+    <!-- RECENT -->
+    <div class="market-section-head">
+        <div>
+            <h2>🆕 Recently Added</h2>
+            <p>Fresh listings from sellers</p>
+        </div>
+
+        <span onclick="showRecentProducts()">
+            See All
+        </span>
+    </div>
+
+    <div
+        id="recentProducts"
+        class="horizontal-products"
+    ></div>
+
+
+    <!-- POPULAR CATEGORIES -->
+    <div class="market-section-head">
+        <div>
+            <h2>🔥 Popular Categories</h2>
+            <p>Explore what people are buying</p>
+        </div>
+    </div>
+
+    <div
+        id="popularCategories"
+        class="popular-category-grid"
+    ></div>
+
+</section>
+
+
+
+<!-- ================= ADVANCED FILTER ================= -->
+
+<div class="filter-toolbar">
+
+    <button
+        class="filter-open-button"
+        onclick="toggleFilters()"
+    >
+        🎛️ Filters
+    </button>
+
+    <select
+        id="sortProducts"
+        onchange="applyAdvancedFilters()"
+    >
+
+        <option value="newest">
+            🆕 Newest
+        </option>
+
+        <option value="low">
+            ₹ Low to High
+        </option>
+
+        <option value="high">
+            ₹ High to Low
+        </option>
+
+    </select>
+
+</div>
+
+
+<div
+    id="advancedFilters"
+    class="advanced-filters"
+>
+
+    <div class="filter-header">
+
+        <div>
+            <h3>Filter Products</h3>
+            <span>Find exactly what you need</span>
+        </div>
+
+        <button onclick="toggleFilters()">
+            ✕
+        </button>
+
+    </div>
+
+
+    <label>Category</label>
+
+    <select id="filterCategorySelect">
+        <option value="">All Categories</option>
+        <option value="Mobile">📱 Mobile</option>
+        <option value="Laptop">💻 Laptop</option>
+        <option value="Furniture">🪑 Furniture</option>
+        <option value="Bike">🏍️ Bike</option>
+        <option value="Cycle">🚲 Cycle</option>
+        <option value="Books">📚 Books</option>
+        <option value="Other">📦 Other</option>
+    </select>
+
+
+    <label>City</label>
+
+    <select id="filterCitySelect">
+
+        <option value="">All Cities</option>
+
+        <option value="Indore">
+            Indore
+        </option>
+
+        <option value="Khargone">
+            Khargone
+        </option>
+
+        <option value="Bhopal">
+            Bhopal
+        </option>
+
+        <option value="Khandwa">
+            Khandwa
+        </option>
+
+        <option value="Dhar">
+            Dhar
+        </option>
+
+        <option value="Ujjain">
+            Ujjain
+        </option>
+
+        <option value="Other">
+            Other
+        </option>
+
+    </select>
+
+
+    <div class="price-filter">
+
+        <div>
+
+            <label>Min Price</label>
+
+            <input
+                id="minPrice"
+                type="number"
+                placeholder="₹ 0"
+            >
+
+        </div>
+
+
+        <div>
+
+            <label>Max Price</label>
+
+            <input
+                id="maxPrice"
+                type="number"
+                placeholder="₹ 1,00,000"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="filter-buttons">
+
+        <button
+            class="clear-filter"
+            onclick="clearAdvancedFilters()"
+        >
+            Clear
+        </button>
+
+        <button
+            class="apply-filter"
+            onclick="applyAdvancedFilters(); toggleFilters();"
+        >
+            ✓ Apply Filters
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= RESULT INFO ================= -->
+
+<div class="result-info">
+
+    <span id="resultCount">
+        Products
+    </span>
+
+    <span id="activeFilterText">
+        All Items
+    </span>
+
+</div>
+
+
+
+<!-- SELL PAGE -->
+<div id="sellPage" class="sell-page">
+
+    <button class="back-button" onclick="closeSellPage()">
+        ← Back
+    </button>
+
+    <h1>Sell Your Item</h1>
+
+    <label class="photo-label">
+        📸 Product Photo
+    </label>
+
+    <input
+        id="itemImage"
+        type="file"
+        accept="image/*"
+    >
+
+    <input
+        id="itemName"
+        type="text"
+        placeholder="Product name"
+    >
+
+    <input
+        id="itemPrice"
+        type="number"
+        placeholder="Price ₹"
+    >
+
+    <select id="itemCategory">
+
+        <option value="">Select Category</option>
+        <option value="Mobile">Mobile</option>
+        <option value="Laptop">Laptop</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Bike">Bike</option>
+        <option value="Cycle">Cycle</option>
+        <option value="Books">Books</option>
+        <option value="Other">Other</option>
+
+    </select>
+
+    <input
+        id="itemLocation"
+        type="text"
+        placeholder="📍 Location"
+    >
+
+<select id="itemCity">
+    <option value="">Select City</option>
+    <option value="Indore">Indore</option>
+    <option value="Khargone">Khargone</option>
+    <option value="Bhopal">Bhopal</option>
+    <option value="Khandwa">Khandwa</option>
+    <option value="Dhar">Dhar</option>
+    <option value="Ujjain">Ujjain</option>
+    <option value="Other">Other</option>
+</select>
+
+    <textarea
+        id="itemDescription"
+        placeholder="Describe your product"
+    ></textarea>
+
+    <button class="post-button" onclick="postItem()">
+        📦 Post Item
+    </button>
+
+</div>
+
+
+<!-- PRODUCT DETAILS PAGE -->
+<div id="productPage" class="product-page">
+
+    <button class="back-button" onclick="closeProduct()">
+        ← Back
+    </button>
+
+    <div id="productDetailsContent"></div>
+
+</div>
+
+<!-- LOGIN / SIGNUP PAGE -->
+<div id="authPage" class="auth-page">
+
+    <button class="back-button" onclick="closeAuthPage()">← Back</button>
+
+    <div class="auth-box">
+
+        <div class="auth-logo">🛍️</div>
+
+        <h1>Purana Bazaar</h1>
+        <p class="auth-subtitle">Buy & Sell Used Items</p>
+
+        <div id="loginForm">
+
+            <h2>Welcome Back 👋</h2>
+
+ 
+ <input
+    id="loginEmail"
+    type="email"
+    placeholder="Email Address"
+>
+
+<input
+    id="loginPassword"
+    type="password"
+    placeholder="Password"
+>
+
+<button class="auth-button" onclick="loginUser()">
+    Login
+</button>
+ 
+
+            <p class="switch-auth">
+                Don't have an account?
+                <span onclick="showSignup()">Create Account</span>
+            </p>
+
+        </div>
+
+
+        <div id="signupForm" style="display:none;">
+
+            <h2>Create Account</h2>
+
+            <input
+                id="signupName"
+                type="text"
+                placeholder="Full Name"
+            >
+
+            <input
+                id="signupMobile"
+                type="tel"
+                placeholder="Mobile Number"
+            >
+
+            <input
+                id="signupEmail"
+                type="email"
+                placeholder="Email Address"
+            >
+
+            <input
+                id="signupPassword"
+                type="password"
+                placeholder="Create Password"
+            >
+
+            <button class="auth-button" onclick="signupUser()">
+                Create Account
+            </button>
+
+            <p class="switch-auth">
+                Already have an account?
+                <span onclick="showLogin()">Login</span>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PROFILE PAGE -->
+<div id="profilePage" class="profile-page">
+
+    <button class="back-button" onclick="closeProfilePage()">
+        ← Back
+    </button>
+
+    <div class="profile-card">
+
+        <div class="profile-avatar">
+            👤
+        </div>
+
+        <h1 id="profileName">User</h1>
+
+        <p id="profileMobile">Mobile</p>
+
+        <p id="profileEmail">Email</p>
+
+        <hr>
+
+        <button onclick="showMyProducts()">
+            📦 My Products
+        </button>
+
+        <button onclick="showFavourites()">
+            ❤️ Favourite Items
+        </button>
+
+        <button class="logout-button" onclick="logoutUser()">
+            🚪 Logout
+        </button>
+
+    </div>
+
+</div>
+<!-- MY PRODUCTS PAGE -->
+<div id="myProductsPage" class="my-products-page">
+
+    <button class="back-button" onclick="closeMyProducts()">
+        ← Back
+    </button>
+
+    <div class="my-products-header">
+        <h1>My Products</h1>
+        <p>Manage your listed items</p>
+    </div>
+
+    <div id="myProductsList" class="my-products-list"></div>
+
+</div>
+
+
+<!-- EDIT PRODUCT PAGE -->
+<div id="editProductPage" class="edit-product-page">
+
+    <button class="back-button" onclick="closeEditProduct()">
+        ← Back
+    </button>
+
+    <h1>Edit Product</h1>
+
+    <input id="editName" type="text" placeholder="Product name">
+
+    <input id="editPrice" type="number" placeholder="Price ₹">
+
+    <input id="editLocation" type="text" placeholder="📍 Location">
+
+    <textarea
+        id="editDescription"
+        placeholder="Product description">
+    </textarea>
+
+    <button
+        class="post-button"
+        onclick="saveEditedProduct()">
+        ✅ Save Changes
+    </button>
+
+</div>
+
+<!-- ================= SELLER PROFILE ================= -->
+
+<div id="sellerPage" class="seller-page">
+
+    <button class="back-button" onclick="closeSellerProfile()">
+        ← Back
+    </button>
+
+    <div id="sellerContent"></div>
+
+</div>
+
+
+<!-- ================= CHAT PAGE ================= -->
+
+<div id="chatPage" class="chat-page">
+
+    <button class="back-button" onclick="closeChatPage()">
+        ← Back
+    </button>
+
+    <div class="chat-header">
+        <div id="chatSellerName">Seller</div>
+        <span>Online marketplace chat</span>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input-box">
+
+        <input
+            id="messageInput"
+            type="text"
+            placeholder="Type a message..."
+            onkeydown="if(event.key==='Enter') sendMessage()"
+        >
+
+        <button onclick="sendMessage()">➤</button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= NOTIFICATIONS ================= -->
+
+<div id="notificationPage" class="notification-page">
+
+    <button class="back-button" onclick="closeNotifications()">
+        ← Back
+    </button>
+
+    <div class="notification-header">
+        <h1>🔔 Notifications</h1>
+        <button onclick="clearNotifications()">
+            Clear All
+        </button>
+    </div>
+
+    <div id="notificationList"></div>
+
+</div>
+
+
+<!-- ================= REPORT ================= -->
+
+<div id="reportPage" class="report-page">
+
+    <button class="back-button" onclick="closeReport()">
+        ← Back
+    </button>
+
+    <div class="report-box">
+
+        <h2>🚨 Report Product</h2>
+
+        <p>
+            Why are you reporting this product?
+        </p>
+
+        <select id="reportReason">
+
+            <option value="">
+                Select reason
+            </option>
+
+            <option value="Fake Product">
+                Fake Product
+            </option>
+
+            <option value="Wrong Information">
+                Wrong Information
+            </option>
+
+            <option value="Scam">
+                Scam / Fraud
+            </option>
+
+            <option value="Inappropriate">
+                Inappropriate Content
+            </option>
+
+            <option value="Other">
+                Other
+            </option>
+
+        </select>
+
+        <textarea
+            id="reportMessage"
+            placeholder="Additional details (optional)"
+        ></textarea>
+
+        <button
+            class="report-submit"
+            onclick="submitReport()"
+        >
+            Submit Report
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
