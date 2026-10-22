@@ -28,11 +28,7 @@ export const REPORT_REASONS = [
   { value: 'other', labelKey: 'report.reason.other' },
 ];
 
-export const QUICK_REPLIES = [
-  'chat.quick.available',
-  'chat.quick.lastPrice',
-  'chat.quick.today',
-];
+export const QUICK_REPLIES = ['chat.quick.available', 'chat.quick.lastPrice', 'chat.quick.today'];
 
 export const LISTING_STATUS = Object.freeze({
   ACTIVE: 'active',

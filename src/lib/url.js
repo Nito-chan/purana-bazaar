@@ -41,7 +41,9 @@ export function slugify(value) {
 
 export function parseListingId(value) {
   const raw = String(value ?? '').trim();
-  const match = raw.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:-|$)/i);
+  const match = raw.match(
+    /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:-|$)/i,
+  );
   return match ? match[1] : raw;
 }
 
@@ -56,7 +58,10 @@ export function cityCategoryPath(citySlug, categorySlug) {
 export function isSafeNext(value) {
   const next = String(value ?? '');
   if (!next.startsWith('/') || next.startsWith('//')) return false;
-  if (next.includes('\\') || /[\u0000-\u001f]/.test(next)) return false;
+  if (next.includes('\\')) return false;
+  for (const character of next) {
+    if (character.codePointAt(0) < 32) return false;
+  }
   return true;
 }
 

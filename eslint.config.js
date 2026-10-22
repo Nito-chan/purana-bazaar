@@ -3,13 +3,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: [
-      'dist/**',
-      'legacy/**',
-      'node_modules/**',
-      'playwright-report/**',
-      'test-results/**',
-    ],
+    ignores: ['dist/**', 'legacy/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'],
   },
   js.configs.recommended,
   {
@@ -34,7 +28,8 @@ export default [
         'error',
         {
           selector: "AssignmentExpression[left.property.name='innerHTML']",
-          message: 'Use textContent or the h() helper. Trusted SVG constants are the only exception.',
+          message:
+            'Use textContent or the h() helper. Trusted SVG constants are the only exception.',
         },
         {
           selector: "CallExpression[callee.name='insertAdjacentHTML']",

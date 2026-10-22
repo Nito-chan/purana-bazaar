@@ -70,11 +70,7 @@ export function openSheet({ title, content, actions = null, wide = false, onClos
     icon('x', { size: 22 }),
   );
 
-  const actionNodes = actions
-    ? Array.isArray(actions)
-      ? actions
-      : [actions]
-    : [];
+  const actionNodes = actions ? (Array.isArray(actions) ? actions : [actions]) : [];
 
   const panel = h(
     'div',

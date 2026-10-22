@@ -76,12 +76,7 @@ export function toast(message, options = {}) {
       role: type === 'error' ? 'alert' : 'status',
     },
     h('span', { class: 'toast__icon' }, icon(iconName, { size: 18 })),
-    h(
-      'div',
-      { class: 'toast__body' },
-      h('div', {}, message),
-      actionButton,
-    ),
+    h('div', { class: 'toast__body' }, h('div', {}, message), actionButton),
     closeButton,
   );
 

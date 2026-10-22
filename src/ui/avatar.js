@@ -3,8 +3,19 @@ import { initials } from '../lib/format.js';
 import { safeImageUrl } from '../lib/url.js';
 import { icon } from './icons.js';
 
-export function avatar({ name = '', src = '', size = 'md', verified = false, className = '' } = {}) {
-  const classes = ['avatar', size !== 'md' ? `avatar--${size}` : '', verified ? 'avatar--verified' : '', className]
+export function avatar({
+  name = '',
+  src = '',
+  size = 'md',
+  verified = false,
+  className = '',
+} = {}) {
+  const classes = [
+    'avatar',
+    size !== 'md' ? `avatar--${size}` : '',
+    verified ? 'avatar--verified' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
   const image = safeImageUrl(src);
@@ -12,7 +23,13 @@ export function avatar({ name = '', src = '', size = 'md', verified = false, cla
     'span',
     { class: classes, 'aria-hidden': 'true' },
     image
-      ? h('img', { src: image, alt: '', width: size === 'sm' ? 34 : size === 'lg' ? 64 : 44, height: size === 'sm' ? 34 : size === 'lg' ? 64 : 44, loading: 'lazy' })
+      ? h('img', {
+          src: image,
+          alt: '',
+          width: size === 'sm' ? 34 : size === 'lg' ? 64 : 44,
+          height: size === 'sm' ? 34 : size === 'lg' ? 64 : 44,
+          loading: 'lazy',
+        })
       : initials(name),
   );
   return element;

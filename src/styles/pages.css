@@ -559,6 +559,11 @@ body[data-page='listing'] main {
   color: var(--color-ink);
 }
 
+.photo-add:focus-within {
+  outline: 3px solid rgba(29, 78, 216, 0.3);
+  outline-offset: 2px;
+}
+
 .photo-add input {
   position: absolute;
   width: 1px;
@@ -1003,6 +1008,7 @@ body[data-page='auth'] main {
 }
 
 .conversation__listing {
+  display: block;
   overflow: hidden;
   color: var(--color-accent-strong);
   font-size: 11px;
@@ -1012,6 +1018,7 @@ body[data-page='auth'] main {
 }
 
 .conversation__preview {
+  display: block;
   overflow: hidden;
   color: var(--color-muted);
   font-size: var(--text-xs);
@@ -1033,8 +1040,31 @@ body[data-page='auth'] main {
 }
 
 /* ---------- Chat ---------- */
+body[data-page='chat'] {
+  padding-bottom: 0;
+}
+
 body[data-page='chat'] main {
-  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
+body[data-page='chat'] .bottom-nav,
+body[data-page='chat'] .site-footer {
+  display: none;
+}
+
+body[data-page='listing'][data-action-bar='true'] {
+  padding-bottom: 0;
+}
+
+body[data-page='listing'][data-action-bar='true'] .bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  body[data-page='listing'][data-action-bar='true'] .site-footer {
+    display: none;
+  }
 }
 
 .chat-page {
@@ -1095,11 +1125,15 @@ body[data-page='chat'] main {
 }
 
 .chat-listing__body {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
 .chat-listing__title {
+  display: block;
   overflow: hidden;
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
@@ -1108,6 +1142,7 @@ body[data-page='chat'] main {
 }
 
 .chat-listing__price {
+  display: block;
   color: var(--color-muted);
   font-size: var(--text-xs);
 }
@@ -1118,6 +1153,23 @@ body[data-page='chat'] main {
   flex-direction: column;
   gap: 8px;
   padding-block: var(--space-4);
+}
+
+.chat-day {
+  align-self: center;
+  margin-block: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+}
+
+.chat-empty {
+  margin: auto;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
 }
 
 .msg {
@@ -1358,11 +1410,13 @@ body[data-page='chat'] main {
 }
 
 .notification__title {
+  display: block;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
 .notification__text {
+  display: block;
   margin-top: 2px;
   color: var(--color-muted);
   font-size: var(--text-xs);
@@ -1370,6 +1424,7 @@ body[data-page='chat'] main {
 }
 
 .notification__time {
+  display: block;
   margin-top: 3px;
   color: var(--color-subtle);
   font-size: 11px;
@@ -1516,20 +1571,12 @@ body[data-page='chat'] main {
 
 /* ---------- Sticky form footer ---------- */
 .form-footer {
-  position: sticky;
-  bottom: calc(var(--bottom-nav-space) + 8px);
-  z-index: 2;
+  margin-top: var(--space-2);
   padding: 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: var(--shadow-md);
-}
-
-@media (min-width: 768px) {
-  .form-footer {
-    bottom: 16px;
-  }
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ---------- Responsive tweaks ---------- */

@@ -68,7 +68,8 @@
     "saved": "Saved",
     "sell": "Sell",
     "chats": "Chats",
-    "profile": "Profile"
+    "profile": "Profile",
+    "primary": "Primary"
   },
   "header": {
     "switchToHindi": "Switch language to Hindi",
@@ -121,7 +122,8 @@
     "apply": "Show results",
     "reset": "Reset filters",
     "count": "{count} filters",
-    "sortLabel": "Sort by"
+    "sortLabel": "Sort by",
+    "priceRangeError": "Minimum price cannot be more than the maximum."
   },
   "sort": {
     "newest": "Newest first",
@@ -176,7 +178,9 @@
     "call": "Call",
     "whatsapp": "WhatsApp",
     "chat": "Chat",
+    "contactSeller": "Contact seller",
     "photoCounter": "{current} / {total}",
+    "photos": "Photos",
     "condition": "Condition",
     "area": "Area",
     "category": "Category",
@@ -196,6 +200,7 @@
   "sell": {
     "title": "Sell something",
     "subtitle": "Good photos, honest details — and your listing is ready.",
+    "details": "Item details",
     "photos": "Photos",
     "photosHint": "2–5 photos work best. Use good light and show any flaws.",
     "addPhotos": "Add photo",
@@ -265,6 +270,7 @@
     "switchLogin": "Sign in",
     "switchSignup": "Create an account",
     "demoNote": "Demo sign-in: any valid email and a password of 8+ characters works.",
+    "demoAccount": "Use the demo account",
     "passwordHint": "At least 8 characters",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
@@ -368,6 +374,7 @@
   },
   "notifications": {
     "title": "Notifications",
+    "subtitle": "Messages, saved items and listing updates in one place.",
     "markAllRead": "Mark all as read",
     "emptyTitle": "You're all caught up",
     "emptyBody": "New activity will show up here.",
@@ -382,8 +389,10 @@
     "noListings": "This seller has no active listings",
     "report": "Report seller",
     "block": "Block seller",
+    "blockBody": "They will be hidden from your feed and can't message you.",
     "blocked": "Seller blocked",
     "unblocked": "Seller unblocked",
+    "listingsTitle": "{name}'s listings",
     "about": "About this seller",
     "rating": "{rating} rating",
     "notFoundTitle": "Seller not found",
@@ -462,6 +471,7 @@
     "reportFailed": "Couldn't send the report. Please try again.",
     "loginFailed": "Email or password is incorrect.",
     "signupFailed": "We couldn't create the account. Please try again.",
+    "emailTaken": "An account with this email already exists. Sign in instead.",
     "resetFailed": "We couldn't send the reset link. Please try again.",
     "offline": "You're offline. Some things may not work.",
     "imageTooLarge": "That photo is too large. Choose a smaller one.",

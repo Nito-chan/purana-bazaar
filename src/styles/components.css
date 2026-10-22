@@ -137,6 +137,12 @@
   font-size: var(--text-xs);
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .demo-pill {
+    display: none !important;
+  }
+}
+
 @media (min-width: 768px) {
   .site-header__bar {
     gap: var(--space-4);
@@ -392,6 +398,7 @@ body[data-nav='hidden'] .bottom-nav {
 }
 
 .icon-btn {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 44px;
@@ -1243,6 +1250,7 @@ body[data-nav='hidden'] .bottom-nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 48px;
   padding: 0 14px;
   border: 0;
@@ -1414,6 +1422,11 @@ body[data-nav='hidden'] .bottom-nav {
 .alert svg {
   flex: none;
   margin-top: 1px;
+}
+
+.alert .btn {
+  flex: none;
+  margin-left: auto;
 }
 
 .alert--info {
@@ -1887,6 +1900,7 @@ body[data-page='chat'] .toast-region {
     position: sticky;
     inset: auto;
     z-index: 1;
+    display: none;
     margin-top: var(--space-6);
     padding: 12px;
     border: 1px solid var(--color-border);

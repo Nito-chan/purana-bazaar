@@ -16,7 +16,8 @@ export function h(tag, props = {}, ...children) {
         el.textContent = String(value);
       } else if (key === 'dataset') {
         for (const [dataKey, dataValue] of Object.entries(value)) {
-          if (dataValue !== null && dataValue !== undefined) el.dataset[dataKey] = String(dataValue);
+          if (dataValue !== null && dataValue !== undefined)
+            el.dataset[dataKey] = String(dataValue);
         }
       } else if (key === 'style' && typeof value === 'object') {
         for (const [styleKey, styleValue] of Object.entries(value)) {
@@ -28,7 +29,9 @@ export function h(tag, props = {}, ...children) {
         value(el);
       } else if (key.startsWith('on') && typeof value === 'function') {
         el.addEventListener(key.slice(2).toLowerCase(), value);
-      } else if (['value', 'checked', 'selected', 'disabled', 'indeterminate', 'tabIndex'].includes(key)) {
+      } else if (
+        ['value', 'checked', 'selected', 'disabled', 'indeterminate', 'tabIndex'].includes(key)
+      ) {
         el[key] = value;
       } else if (value === true) {
         el.setAttribute(key, '');
@@ -79,7 +82,8 @@ export function on(target, event, handler, options) {
 
 export function delegate(root, selector, event, handler) {
   const listener = (nativeEvent) => {
-    const target = nativeEvent.target instanceof Element ? nativeEvent.target.closest(selector) : null;
+    const target =
+      nativeEvent.target instanceof Element ? nativeEvent.target.closest(selector) : null;
     if (target && root.contains(target)) handler(nativeEvent, target);
   };
   root.addEventListener(event, listener);

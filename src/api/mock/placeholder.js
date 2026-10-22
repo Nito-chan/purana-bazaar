@@ -31,7 +31,13 @@ const ART = {
     '<path d="M200 82l108 58v120l-108 58-108-58V140z"/><path d="M92 140l108 58 108-58"/><path d="M200 198v120"/><path d="M146 112l108 58"/>',
 };
 
-export function placeholderImage({ slug = 'other', name = 'Listing', variant = 0, width = 800, height = 800 }) {
+export function placeholderImage({
+  slug = 'other',
+  name = 'Listing',
+  variant = 0,
+  width = 800,
+  height = 800,
+}) {
   const palette = PALETTES[slug] || PALETTES.other;
   const art = ART[slug] || ART.other;
   const angle = (variant * 37 + slug.length * 13) % 360;

@@ -31,7 +31,6 @@ export function formatRelativeTime(iso, lang = 'en') {
   if (Number.isNaN(date.getTime())) return '';
   const diffMs = date.getTime() - Date.now();
   const abs = Math.abs(diffMs);
-  const seconds = Math.round(diffMs / 1000);
   const minutes = Math.round(diffMs / 60000);
   const hours = Math.round(diffMs / 3600000);
   const days = Math.round(diffMs / 86400000);

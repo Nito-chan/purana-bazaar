@@ -47,10 +47,7 @@ function simpleVariants(token) {
 }
 
 export function expandQuery(value) {
-  return normalizeQuery(value)
-    .split(' ')
-    .filter(Boolean)
-    .map(simpleVariants);
+  return normalizeQuery(value).split(' ').filter(Boolean).map(simpleVariants);
 }
 
 export function matchesQuery(haystack, query) {

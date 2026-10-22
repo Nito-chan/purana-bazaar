@@ -46,14 +46,7 @@ export function emptyState({ iconName = 'inbox', title, body, actions = [] }) {
   );
 }
 
-export function errorState({
-  title,
-  body,
-  retryLabel,
-  onRetry,
-  homeLabel,
-  showHome = true,
-} = {}) {
+export function errorState({ title, body, retryLabel, onRetry, homeLabel, showHome = true } = {}) {
   const actions = [];
   if (onRetry) {
     actions.push(

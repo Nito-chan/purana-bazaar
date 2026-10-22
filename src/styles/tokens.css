@@ -19,7 +19,7 @@
   --color-on-accent: #16181d;
 
   /* Status */
-  --color-success: #15803d;
+  --color-success: #166534;
   --color-success-soft: #e7f6ec;
   --color-danger: #b91c1c;
   --color-danger-soft: #fdecec;
@@ -34,8 +34,8 @@
 
   /* Typography */
   --font-sans:
-    system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Devanagari',
-    'Nirmala UI', Arial, sans-serif;
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Devanagari', 'Nirmala UI',
+    Arial, sans-serif;
   --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;

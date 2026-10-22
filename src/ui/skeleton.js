@@ -77,10 +77,6 @@ export function pageSkeleton({ title = 'Loading' } = {}) {
     h('span', { class: 'sr-only' }, title),
     h('div', { class: 'skeleton skeleton--title', style: { width: '48%', height: '28px' } }),
     h('div', { class: 'skeleton skeleton--title', style: { width: '30%', marginTop: '12px' } }),
-    h(
-      'div',
-      { style: { marginTop: '20px' } },
-      skeletonGrid(8),
-    ),
+    h('div', { style: { marginTop: '20px' } }, skeletonGrid(8)),
   );
 }
