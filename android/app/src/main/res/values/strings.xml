@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">purana-bazaar</string>
-    <string name="title_activity_main">purana-bazaar</string>
+    <string name="app_name">Purana Bazaar</string>
+    <string name="title_activity_main">Purana Bazaar</string>
     <string name="package_name">com.puranabazaar.app</string>
     <string name="custom_url_scheme">com.puranabazaar.app</string>
 </resources>
