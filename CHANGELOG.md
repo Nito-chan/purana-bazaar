@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.4] — 2026-10-23
+
+### Added
+
+- Admin dashboard (`/admin`): stats, report moderation, listing hide, banner management; mock + real API.
+- Boosts/payments: promotion products (`boost-7d` ₹49, `dealer-30d` ₹199), boost UI on listing detail,
+  `api.promotions.create` / `api.payments.create` in mock + Supabase; mock Razorpay flow.
+- Account deletion (`/account/delete`): request deletion, cancel pending requests; `api.accountDeletionRequests`.
+- Legal pages: `/terms` (Terms of Service) and `/privacy` (Privacy Policy).
+- i18n dictionaries loaded dynamically in separate chunks to keep entry bundle small.
+
 ## [0.2.3] — 2026-10-23
 
 ### Added

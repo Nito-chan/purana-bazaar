@@ -139,7 +139,7 @@ This is intentional: no fake production content.
 | 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | **Complete**        |
 | 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | **Complete**        |
 | 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | **Complete** (core) |
-| 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started         |
+| 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | **Complete** (core) |
 | 6     | Android app, FCM, Play Store release                                      | Not started         |
 
 Phase 2 must not start until the Phase 1 gate is signed off. The Phase 1 functional gate is now
@@ -171,6 +171,18 @@ green; the remaining launch items are configuration and deployment, not schema w
   per-listing OG images deferred to a later edge-function/prerender decision.
 - **Deferred (external/infra):** push notifications (VAPID + push service), referrals (reward
   tracking), per-listing OG edge function.
+
+### Phase 5 status
+
+- **Boosts/payments:** delivered — promotion products (`boost-7d` ₹49, `dealer-30d` ₹199),
+  `api.promotions.create` / `api.payments.create` in mock + Supabase. Boost button on listing
+  detail for owners. Payments use a mock Razorpay flow; live Razorpay requires KYC setup (external).
+  First 50 paid boosts require manual admin review.
+- **Admin dashboard:** delivered — `/admin` replaces placeholder. Stats, report moderation,
+  listing hide, banner management.
+- **Account deletion:** delivered — `/account/delete` — request deletion, cancel pending requests.
+- **Legal pages:** delivered — `/terms` (Terms of Service) and `/privacy` (Privacy Policy).
+- **Deferred:** Razorpay KYC, Resend/SMTP, admin MFA, storefronts.
 
 ---
 
