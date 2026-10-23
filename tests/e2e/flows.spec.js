@@ -99,8 +99,19 @@ test.describe('selling', () => {
 
     await spaNavigate(page, '/me/listings');
     await expect(page.getByRole('heading', { level: 1, name: 'My listings' })).toBeVisible();
+    const summary = page.locator('.performance-summary');
+    await expect(summary.getByRole('heading', { name: 'Your performance' })).toBeVisible();
+    await expect(summary.locator('.performance-card')).toHaveCount(4);
+    await expect(summary.locator('.performance-card').filter({ hasText: 'Active' })).toContainText(
+      /[1-9]/,
+    );
+    await expect(
+      summary.locator('.performance-card').filter({ hasText: 'Total views' }),
+    ).toContainText(/\d/);
     const row = page.locator('.listing-row').filter({ hasText: title });
     await expect(row).toBeVisible();
+    await expect(row.locator('.listing-row__metric')).toContainText('contact');
+    await expectNoHorizontalOverflow(page);
     await row.getByRole('link', { name: 'Edit' }).click();
     await expect(page).toHaveURL(/\/sell\//);
     await expect(page.locator('#sell-title')).toHaveValue(title);

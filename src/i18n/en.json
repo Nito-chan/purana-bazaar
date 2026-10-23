@@ -332,7 +332,13 @@
     "markedSold": "Listing marked as sold",
     "renewed": "Listing bumped back to the top",
     "views": "{count} views",
-    "pending": "Under review"
+    "pending": "Under review",
+    "performance": "Your performance",
+    "performanceHint": "Across all your listings, all time.",
+    "totalViews": "Total views",
+    "totalContacts": "Buyer contacts",
+    "contacts_one": "{count} contact",
+    "contacts_other": "{count} contacts"
   },
   "saved": {
     "title": "Saved items",

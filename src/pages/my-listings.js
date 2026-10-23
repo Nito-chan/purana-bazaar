@@ -1,6 +1,6 @@
 import { api } from '../api/index.js';
 import { h } from '../lib/dom.js';
-import { formatPrice, formatRelativeTime, formatViews } from '../lib/format.js';
+import { formatNumber, formatPrice, formatRelativeTime, formatViews } from '../lib/format.js';
 import { addQuery, currentPath, listingPath } from '../lib/url.js';
 import { replaceUrl } from '../lib/navigation.js';
 import { isSignedIn } from '../lib/auth.js';
@@ -61,6 +61,10 @@ export async function render({ query }) {
     'aria-labelledby': 'my-listings-tab-active',
   });
   const resultsCount = h('p', { class: 'result-count' });
+  const performanceHost = h('section', {
+    class: 'performance-summary',
+    'aria-labelledby': 'performance-title',
+  });
 
   function counts() {
     return {
@@ -68,6 +72,77 @@ export async function render({ query }) {
       sold: listings.filter((listing) => listing.status === 'sold').length,
       expired: listings.filter((listing) => listing.status === 'expired').length,
     };
+  }
+
+  function performanceTotals() {
+    return listings.reduce(
+      (totals, listing) => {
+        totals.views += Number(listing.viewsCount) || 0;
+        totals.contacts += Number(listing.contactsCount) || 0;
+        if (listing.status === 'active') totals.active += 1;
+        if (listing.status === 'sold') totals.sold += 1;
+        return totals;
+      },
+      { active: 0, sold: 0, views: 0, contacts: 0 },
+    );
+  }
+
+  function performanceCard({ label, value, iconName, tone }) {
+    return h(
+      'article',
+      { class: `performance-card performance-card--${tone}` },
+      h('span', { class: 'performance-card__icon' }, icon(iconName, { size: 19 })),
+      h(
+        'div',
+        { class: 'performance-card__body' },
+        h('p', { class: 'performance-card__value' }, formatNumber(value)),
+        h('p', { class: 'performance-card__label' }, label),
+      ),
+    );
+  }
+
+  function renderPerformance() {
+    const totals = performanceTotals();
+    performanceHost.replaceChildren(
+      h(
+        'div',
+        { class: 'performance-summary__head' },
+        h(
+          'h2',
+          { class: 'performance-summary__title', id: 'performance-title' },
+          t('myListings.performance'),
+        ),
+        h('p', { class: 'performance-summary__hint' }, t('myListings.performanceHint')),
+      ),
+      h(
+        'div',
+        { class: 'performance-grid' },
+        performanceCard({
+          label: t('myListings.active'),
+          value: totals.active,
+          iconName: 'tag',
+          tone: 'active',
+        }),
+        performanceCard({
+          label: t('myListings.totalViews'),
+          value: totals.views,
+          iconName: 'eye',
+          tone: 'views',
+        }),
+        performanceCard({
+          label: t('myListings.totalContacts'),
+          value: totals.contacts,
+          iconName: 'phone',
+          tone: 'contacts',
+        }),
+        performanceCard({
+          label: t('myListings.sold'),
+          value: totals.sold,
+          iconName: 'check-circle',
+          tone: 'sold',
+        }),
+      ),
+    );
   }
 
   function renderTabs() {
@@ -118,6 +193,7 @@ export async function render({ query }) {
   async function reload() {
     try {
       listings = await api.listings.my();
+      renderPerformance();
       renderTabs();
       renderList();
     } catch {
@@ -237,6 +313,12 @@ export async function render({ query }) {
               { class: 'listing-row__meta' },
               statusBadge(listing.status),
               h('span', {}, formatViews(listing.viewsCount, language)),
+              h(
+                'span',
+                { class: 'listing-row__metric' },
+                icon('phone', { size: 12 }),
+                t('myListings.contacts', { count: Number(listing.contactsCount) || 0 }),
+              ),
               h('span', {}, formatRelativeTime(listing.bumpedAt, language)),
             ),
             h(
@@ -264,6 +346,7 @@ export async function render({ query }) {
     );
   }
 
+  renderPerformance();
   renderTabs();
   renderList();
 
@@ -286,6 +369,7 @@ export async function render({ query }) {
         t('nav.sell'),
       ),
     ),
+    performanceHost,
     h('div', { style: { marginTop: '20px' } }, tabsHost),
     h('div', { class: 'results-head', style: { marginTop: '12px' } }, resultsCount),
     listHost,

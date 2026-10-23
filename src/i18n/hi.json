@@ -332,7 +332,13 @@
     "markedSold": "लिस्टिंग बिक गई के रूप में मार्क हुई",
     "renewed": "लिस्टिंग फिर से ऊपर आ गई",
     "views": "{count} व्यू",
-    "pending": "समीक्षा में"
+    "pending": "समीक्षा में",
+    "performance": "आपका प्रदर्शन",
+    "performanceHint": "आपकी सभी लिस्टिंग्स का कुल हिसाब।",
+    "totalViews": "कुल व्यू",
+    "totalContacts": "खरीदार संपर्क",
+    "contacts_one": "{count} संपर्क",
+    "contacts_other": "{count} संपर्क"
   },
   "saved": {
     "title": "सेव्ड चीज़ें",

@@ -109,8 +109,18 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
 
   // Edit the real listing.
   await page.goto('/me/listings');
+  const summary = page.locator('.performance-summary');
+  await expect(summary.getByRole('heading', { name: 'Your performance' })).toBeVisible();
+  await expect(summary.locator('.performance-card')).toHaveCount(4);
+  await expect(summary.locator('.performance-card').filter({ hasText: 'Active' })).toContainText(
+    '1',
+  );
+  await expect(
+    summary.locator('.performance-card').filter({ hasText: 'Total views' }),
+  ).toContainText(/\d/);
   const sellerRow = page.locator('.listing-row').filter({ hasText: title });
   await expect(sellerRow).toBeVisible();
+  await expect(sellerRow.locator('.listing-row__metric')).toContainText('contact');
   await sellerRow.getByRole('link', { name: 'Edit' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Edit listing' })).toBeVisible();
   await page.locator('#sell-title').fill(editedTitle);
@@ -154,6 +164,7 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
   await expect(page.locator('.toast')).toContainText('Listing marked as sold');
   await dismissToasts(page);
   await page.getByRole('tab', { name: /^Sold/ }).click();
+  await expect(summary.locator('.performance-card').filter({ hasText: 'Sold' })).toContainText('1');
   const soldRow = page.locator('.listing-row').filter({ hasText: editedTitle });
   await expect(soldRow).toBeVisible();
   await soldRow.getByRole('button', { name: 'Delete' }).click();
@@ -162,6 +173,10 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
   await deleteDialog.getByRole('button', { name: 'Delete' }).click();
   await expect(page.locator('.listing-row').filter({ hasText: editedTitle })).toHaveCount(0);
   await expect(page.getByText('No listings here')).toBeVisible();
+  await expect(summary.locator('.performance-card').filter({ hasText: 'Active' })).toContainText(
+    '0',
+  );
+  await expect(summary.locator('.performance-card').filter({ hasText: 'Sold' })).toContainText('0');
   await dismissToasts(page);
   await expectNoHorizontalOverflow(page);
 
