@@ -159,7 +159,11 @@ export function render() {
     ),
   );
 
-  const activeFilters = h('div', { class: 'active-filters' });
+  const activeFilters = h('div', {
+    class: 'active-filters',
+    role: 'group',
+    'aria-label': t('home.activeFilters'),
+  });
   const resultsCount = h('p', { class: 'result-count', role: 'status', 'aria-live': 'polite' });
   const feed = h('div', { class: 'listing-grid listing-grid--home', 'aria-busy': 'true' });
   const sentinel = h('div', { class: 'feed-sentinel' });
@@ -179,10 +183,22 @@ export function render() {
 
   function filterCountValue() {
     let count = 0;
+    if (filters.category) count += 1;
     if (filters.min || filters.max) count += 1;
     if (filters.condition) count += 1;
     if (filters.photos) count += 1;
     return count;
+  }
+
+  function hasRefinements() {
+    return Boolean(
+      filters.q ||
+      filters.category ||
+      filters.min ||
+      filters.max ||
+      filters.condition ||
+      filters.photos,
+    );
   }
 
   function updateHead() {
@@ -437,17 +453,18 @@ export function render() {
       resultsCount.textContent = t('home.results', { count: total });
 
       if (!items.length) {
+        const refined = hasRefinements();
         feed.className = '';
         feed.setAttribute('aria-busy', 'false');
         feed.replaceChildren(
           emptyState({
-            iconName: filters.q ? 'search' : 'inbox',
-            title: filters.q ? t('home.noResultsTitle') : t('home.emptyTitle'),
-            body: filters.q ? t('home.noResultsBody') : t('home.emptyBody'),
-            actions: filters.q
+            iconName: refined ? 'search' : 'inbox',
+            title: refined ? t('home.noResultsTitle') : t('home.emptyTitle'),
+            body: refined ? t('home.noResultsBody') : t('home.emptyBody'),
+            actions: refined
               ? [
                   {
-                    label: t('home.clearSearch'),
+                    label: t('home.clearFilters'),
                     onClick: clearAll,
                     variant: 'primary',
                   },

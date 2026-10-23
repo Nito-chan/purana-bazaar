@@ -107,7 +107,8 @@
     "comingSoon": "Coming soon",
     "noResultsTitle": "No matches",
     "noResultsBody": "Try a different word, or clear a filter.",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "clearFilters": "Clear filters"
   },
   "filter": {
     "title": "Filter listings",

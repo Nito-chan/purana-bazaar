@@ -24,6 +24,7 @@ test.describe('discovery', () => {
     await page.getByRole('button', { name: 'Mobiles', exact: true }).click();
     await expect(page).toHaveURL(/category=mobiles/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Mobiles in Khargone');
+    await expect(page.locator('.filter-count')).toHaveText('1');
     await expect(cards.first()).toBeVisible();
 
     await page.getByRole('searchbox', { name: /search listings/i }).fill('iPhone');
@@ -33,6 +34,16 @@ test.describe('discovery', () => {
     await expect(cards.first()).toBeVisible();
 
     await page.getByRole('button', { name: /clear search/i }).click();
+    await expect(cards.first()).toBeVisible();
+
+    await page.getByRole('button', { name: /^Filters/ }).click();
+    const filters = page.getByRole('dialog');
+    await expect(filters).toBeVisible();
+    await filters.locator('#filter-min').fill('9999999');
+    await filters.getByRole('button', { name: 'Show results' }).click();
+    await expect(page.getByRole('heading', { name: 'No matches' })).toBeVisible();
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page).toHaveURL(/\/$/);
     await expect(cards.first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });

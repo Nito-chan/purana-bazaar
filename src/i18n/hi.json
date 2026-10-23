@@ -107,7 +107,8 @@
     "comingSoon": "जल्द आएगा",
     "noResultsTitle": "कुछ नहीं मिला",
     "noResultsBody": "दूसरा शब्द आज़माएं या कोई फ़िल्टर हटाएं।",
-    "clearSearch": "खोज साफ़ करें"
+    "clearSearch": "खोज साफ़ करें",
+    "clearFilters": "फ़िल्टर हटाएं"
   },
   "filter": {
     "title": "लिस्टिंग फ़िल्टर करें",
