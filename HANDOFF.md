@@ -27,18 +27,19 @@ sell draft, recently viewed items and dismissed banners persist in `localStorage
 
 ### Real Supabase mode
 
-| Area          | Delivered                                                                                                                                                  |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth          | Email/password signup, login, logout, session restore, duplicate-email and invalid-login errors, password-reset request                                    |
-| Listings      | Create with compressed WebP/JPEG photo upload, edit, add/remove photos, detail, feed, similar listings, mark sold, renew, soft delete with storage cleanup |
+| Area                | Delivered                                                                                                                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth                | Email/password signup, login, logout, session restore, duplicate-email and invalid-login errors, password-reset request                                                                        |
+| Listings            | Create with compressed WebP/JPEG photo upload, edit, add/remove photos, detail, feed, similar listings, mark sold, renew, soft delete with storage cleanup                                     |
+| Ratings             | Review list and create form on listing detail; seller rating stars on listing detail and seller profile                                                                                        |
 | Category attributes | Sell/edit renders category-specific fields from `categories.attributes_schema`, per-field validation, draft persistence, boolean Yes/No storage, translated labels, and listing detail display |
-| Seller dashboard | My Listings summary cards (active, total views, buyer contacts, sold) plus per-listing views/contact counts                                               |
-| Discovery     | City/category filters, price/condition filters, search, sort, cursor pagination, clear-refinement empty states                                             |
-| Account       | Profile, my listings, saved items, seller profile                                                                                                          |
-| Messaging     | Start conversation, list chats, read chat, send message, unread count, mark read                                                                           |
-| Notifications | List, unread state, mark one/all read, bell and bottom-nav badges                                                                                          |
-| Safety        | Block/unblock seller, report listing or user, masked phone until reveal, contact reveal RPC                                                                |
-| Data rules    | RLS on every public table, private phone table, protected listing columns, admin role table                                                                |
+| Seller dashboard    | My Listings summary cards (active, total views, buyer contacts, sold) plus per-listing views/contact counts                                                                                    |
+| Discovery           | City/category filters, price/condition filters, search, sort, cursor pagination, clear-refinement empty states                                                                                 |
+| Account             | Profile, my listings, saved items, seller profile                                                                                                                                              |
+| Messaging           | Start conversation, list chats, read chat, send message, unread count, mark read                                                                                                               |
+| Notifications       | List, unread state, mark one/all read, bell and bottom-nav badges                                                                                                                              |
+| Safety              | Block/unblock seller, report listing or user, masked phone until reveal, contact reveal RPC                                                                                                    |
+| Data rules          | RLS on every public table, private phone table, protected listing columns, admin role table                                                                                                    |
 
 Real-mode UI hides all Demo pills, demo-only notes and the demo-account button. The mock bundle
 does not include `@supabase/supabase-js`.
@@ -134,13 +135,26 @@ This is intentional: no fake production content.
 | 0     | Mock app, routing, design system, all core screens, tests                 | **Complete** |
 | 1     | Supabase schema, RLS, real auth, feed, storage, chats, safety             | **Complete** |
 | 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | **Complete** |
-| 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | Not started  |
+| 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | In progress  |
 | 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | Not started  |
 | 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started  |
 | 6     | Android app, FCM, Play Store release                                      | Not started  |
 
 Phase 2 must not start until the Phase 1 gate is signed off. The Phase 1 functional gate is now
 green; the remaining launch items are configuration and deployment, not schema work.
+
+### Phase 3 status
+
+- **Contact delivery:** server-side — the `after_message_insert` trigger creates a recipient
+  notification on every new message (already in schema).
+- **Moderation:** server-side — `auto_hide_reported_listing` hides a listing after 3 distinct open
+  reports (already in schema). Supabase Realtime publication updated for
+  `messages`/`notifications`/`conversations`.
+- **Ratings:** delivered — review list + create form on listing detail, mock + real API.
+- **Realtime chat / live notification badge:** client subscription NOT bundled. Supabase Realtime is
+  not provisioned on this project, and adding the client breaks the strict mock bundle budget. To
+  activate: provision Realtime, restore the `subscribeToConversation` subscription in `chat.js`,
+  and re-verify the mock bundle budget.
 
 ---
 

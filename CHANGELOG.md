@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2] — 2026-10-23
+
+### Added
+
+- Ratings/reviews: review list and create form on listing detail; seller rating stars on listing detail and seller profile; mock and real API (`api.reviews.list` / `api.reviews.create`); English and Hindi translations.
+- Supabase Realtime publication updated to include `messages`, `notifications` and `conversations` tables (prepares for live chat/notification delivery).
+
+### Changed
+
+- Realtime chat client subscription not bundled: Supabase Realtime is not provisioned on this project and the client would break the strict mock bundle budget. Activate after provisioning Realtime.
+
 ## [0.2.1] — 2026-10-23
 
 ### Added
