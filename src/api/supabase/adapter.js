@@ -177,6 +177,7 @@ function decorateListing(listing) {
     isFavourite: Boolean(listing.isFavourite),
     isMine: Boolean(listing.isMine),
     isBlockedSeller: Boolean(listing.isBlockedSeller),
+    isFeatured: Boolean(listing.is_featured),
   };
 }
 

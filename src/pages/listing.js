@@ -23,6 +23,7 @@ import { icon } from '../ui/icons.js';
 import { listingGrid } from '../ui/listing-card.js';
 import { openReportSheet } from '../ui/report-sheet.js';
 import { reviewForm, reviewNode } from '../ui/reviews.js';
+import { openSheet } from '../ui/sheet.js';
 import { toast } from '../ui/toast.js';
 
 function withBusy(button, work) {
@@ -87,6 +88,102 @@ export async function render({ params }) {
   const user = currentUser();
   const alreadyReviewed = Boolean(user) && reviews.some((r) => r.reviewerId === user.id);
   const canReview = Boolean(user) && !isMine && !alreadyReviewed;
+
+  let boostProduct = null;
+  let boostSubmitting = false;
+  let boostError = '';
+
+  async function boostListing(productId) {
+    boostSubmitting = true;
+    boostError = '';
+    try {
+      await api.promotions.create({ listingId: id, productId });
+      toast.success(t('listing.boosted'));
+      // Refresh to reflect isFeatured change.
+      window.location.reload();
+    } catch (error) {
+      boostError = (error && error.messageKey ? t(error.messageKey) : null) || t('errors.generic');
+    } finally {
+      boostSubmitting = false;
+    }
+  }
+
+  function openBoostSheet() {
+    const sheetContent = h(
+      'div',
+      { class: 'boost-sheet' },
+      h(
+        'p',
+        { class: 'text-muted' },
+        t('listing.boostSubtitle', { title: listing.title }),
+      ),
+      h(
+        'div',
+        { class: 'boost-options' },
+        h(
+          'button',
+          {
+            class: `boost-option${boostProduct === 'boost-7d' ? ' boost-option--selected' : ''}`,
+            type: 'button',
+            onClick: () => {
+              boostProduct = 'boost-7d';
+            },
+          },
+          h('span', { class: 'boost-option__name' }, '7-day listing boost'),
+          h('span', { class: 'boost-option__price' }, '₹49'),
+          boostProduct === 'boost-7d' ? h('span', { class: 'boost-option__check' }, icon('check', { size: 16 })) : null,
+        ),
+        h(
+          'button',
+          {
+            class: `boost-option${boostProduct === 'dealer-30d' ? ' boost-option--selected' : ''}`,
+            type: 'button',
+            onClick: () => {
+              boostProduct = 'dealer-30d';
+            },
+          },
+          h('span', { class: 'boost-option__name' }, '30-day dealer boost'),
+          h('span', { class: 'boost-option__price' }, '₹199'),
+          boostProduct === 'dealer-30d' ? h('span', { class: 'boost-option__check' }, icon('check', { size: 16 })) : null,
+        ),
+      ),
+      boostError
+        ? h(
+            'p',
+            { class: 'field__error' },
+            icon('alert-circle', { size: 16 }),
+            h('span', {}, boostError),
+          )
+        : null,
+      h(
+        'div',
+        { class: 'form__actions' },
+        h(
+          'button',
+          { class: 'btn btn--secondary', type: 'button', onClick: () => handle.close() },
+          t('common.cancel'),
+        ),
+        h(
+          'button',
+          {
+            class: 'btn btn--primary',
+            type: 'button',
+            disabled: !boostProduct || boostSubmitting,
+            onClick: () => {
+              handle.close();
+              boostListing(boostProduct);
+            },
+          },
+          boostSubmitting ? t('common.saving') : t('listing.boost'),
+        ),
+      ),
+    );
+
+    const handle = openSheet({
+      title: t('listing.boostTitle'),
+      content: sheetContent,
+    });
+  }
 
   async function submitReview(values) {
     reviewSubmitting = true;
@@ -220,6 +317,19 @@ export async function render({ params }) {
             icon('pencil', { size: 18 }),
             t('myListings.edit'),
           ),
+          !listing.isFeatured
+            ? h(
+                'button',
+                {
+                  class: 'btn btn--accent btn--block',
+                  type: 'button',
+                  disabled: boostSubmitting,
+                  onClick: () => openBoostSheet(),
+                },
+                icon('zap', { size: 18 }),
+                t('listing.boost'),
+              )
+            : null,
         )
       : h(
           'div',
@@ -250,6 +360,19 @@ export async function render({ params }) {
               icon('pencil', { size: 18 }),
               t('myListings.edit'),
             ),
+            !listing.isFeatured
+              ? h(
+                  'button',
+                  {
+                    class: 'btn btn--accent',
+                    type: 'button',
+                    disabled: boostSubmitting,
+                    onClick: () => openBoostSheet(),
+                  },
+                  icon('zap', { size: 18 }),
+                  t('listing.boost'),
+                )
+              : null,
           )
         : null;
 

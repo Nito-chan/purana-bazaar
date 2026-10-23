@@ -197,7 +197,11 @@
     "notFoundBody": "It may have been sold, removed or the link may be wrong.",
     "shareCopied": "Listing link copied",
     "shareError": "Couldn't share this listing",
-    "offer": "Make an offer"
+    "offer": "Make an offer",
+    "boost": "Boost",
+    "boostTitle": "Boost this listing",
+    "boostSubtitle": "Make “{title}” stand out to more buyers.",
+    "boosted": "Listing boosted!"
   },
   "sell": {
     "title": "Sell something",
