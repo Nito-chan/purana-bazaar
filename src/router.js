@@ -61,8 +61,7 @@ const routes = [
   {
     name: 'admin',
     pattern: /^\/admin\/?$/,
-    load: () => import('./pages/info.js'),
-    variant: 'admin',
+    load: () => import('./pages/admin.js'),
   },
   {
     name: 'wanted',
