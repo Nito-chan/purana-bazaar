@@ -31,7 +31,9 @@ sell draft, recently viewed items and dismissed banners persist in `localStorage
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Auth          | Email/password signup, login, logout, session restore, duplicate-email and invalid-login errors, password-reset request                                    |
 | Listings      | Create with compressed WebP/JPEG photo upload, edit, add/remove photos, detail, feed, similar listings, mark sold, renew, soft delete with storage cleanup |
-| Discovery     | City/category filters, price/condition filters, search, sort, cursor pagination                                                                            |
+| Category attributes | Sell/edit renders category-specific fields from `categories.attributes_schema`, per-field validation, draft persistence, boolean Yes/No storage, translated labels, and listing detail display |
+| Seller dashboard | My Listings summary cards (active, total views, buyer contacts, sold) plus per-listing views/contact counts                                               |
+| Discovery     | City/category filters, price/condition filters, search, sort, cursor pagination, clear-refinement empty states                                             |
 | Account       | Profile, my listings, saved items, seller profile                                                                                                          |
 | Messaging     | Start conversation, list chats, read chat, send message, unread count, mark read                                                                           |
 | Notifications | List, unread state, mark one/all read, bell and bottom-nav badges                                                                                          |
@@ -131,7 +133,7 @@ This is intentional: no fake production content.
 | ----- | ------------------------------------------------------------------------- | ------------ |
 | 0     | Mock app, routing, design system, all core screens, tests                 | **Complete** |
 | 1     | Supabase schema, RLS, real auth, feed, storage, chats, safety             | **Complete** |
-| 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | Not started  |
+| 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | **Complete** |
 | 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | Not started  |
 | 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | Not started  |
 | 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started  |
@@ -156,6 +158,8 @@ green; the remaining launch items are configuration and deployment, not schema w
   boost fulfilment are not implemented yet.
 - Expansion gate: 300 active listings and 100 contact events/week for four consecutive weeks. New
   cities need 50–100 real listings before opening.
+- Per-listing OG images require an edge function or prerender (a pure SPA cannot generate distinct
+  previews); deferred to Phase 4. The listing detail share button and static OG are already present.
 
 ### Before the first public demo
 

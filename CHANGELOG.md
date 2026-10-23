@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.1] — 2026-10-23
+
+### Added
+
+- Category-specific listing attributes: sell/edit renders fields from `categories.attributes_schema`, per-field validation, draft persistence, boolean Yes/No storage, translated labels and values, mock schema parity, and listing detail display.
+- Seller performance summary on My Listings: active/total views/buyer contacts/sold summary cards plus per-listing views and contact counts.
+- CSP updated to allow Supabase API, Realtime and Storage hosts in production.
+- Hindi translations for category attributes and seller dashboard strings.
+
+### Fixed
+
+- My Listings now counts category as an active filter on the home feed and shows a "Clear filters" action on empty refined results.
+- Empty home state distinguishes "no listings yet" from "no matches" for refined searches.
+- Real-mode seller lifecycle test extended with category attributes and performance-summary assertions.
+
 ## [0.2.0] — 2026-10-23
 
 ### Added
