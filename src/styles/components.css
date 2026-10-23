@@ -1222,6 +1222,44 @@ body[data-nav='hidden'] .bottom-nav {
   width: 100%;
 }
 
+.category-attributes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-border);
+}
+
+.category-attributes[hidden] {
+  display: none;
+}
+
+.category-attributes__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-attributes__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.category-attributes__grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.category-attributes__boolean {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 560px) {
+  .category-attributes__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 480px) {
   .field__row {
     grid-template-columns: repeat(2, minmax(0, 1fr));

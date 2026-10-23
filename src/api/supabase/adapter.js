@@ -129,8 +129,13 @@ function attributesFor(attributes) {
   const result = {};
   if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) return result;
   for (const [key, value] of Object.entries(attributes)) {
+    if (typeof value === 'boolean') {
+      result[String(key).slice(0, 40)] = value ? 'Yes' : 'No';
+      continue;
+    }
     if (typeof value !== 'string' && typeof value !== 'number') continue;
-    result[String(key).slice(0, 40)] = String(value).slice(0, 120);
+    const text = String(value).replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (text) result[String(key).slice(0, 40)] = text;
   }
   return result;
 }

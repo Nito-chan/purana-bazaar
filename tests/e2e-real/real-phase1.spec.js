@@ -79,6 +79,10 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
   await page.locator('#sell-title').fill(title);
   await page.locator('#sell-price').fill('1800');
   await page.locator('#sell-category').selectOption({ label: 'Cycles' });
+  await expect(page.getByRole('heading', { name: 'Item specifics' })).toBeVisible();
+  await page.locator('#sell-attr-brand').fill('Hero');
+  await page.locator('#sell-attr-gears').fill('6');
+  await page.locator('#sell-attr-frame').fill('Steel');
   await page.locator('#sell-area').fill('Civil Lines');
   await page
     .locator('#sell-description')
@@ -94,6 +98,8 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
   await expect(page.locator('.detail-title')).toHaveText(title);
   await expect(page.locator('.price-ticket')).toContainText('1,800');
   await expect(page.locator('.detail-media img')).toHaveCount(1);
+  await expect(page.locator('.attr').filter({ hasText: 'Brand' })).toContainText('Hero');
+  await expect(page.locator('.attr').filter({ hasText: 'Frame' })).toContainText('Steel');
   await expectNoBrokenImages(page);
   await expect(page.locator('.detail-media .fav-btn')).toHaveCount(0);
   const listingUrl = page.url();
@@ -109,10 +115,13 @@ test('real Supabase auth and listing lifecycle work end to end', async ({ page }
   await expect(page.getByRole('heading', { level: 1, name: 'Edit listing' })).toBeVisible();
   await page.locator('#sell-title').fill(editedTitle);
   await page.locator('#sell-price').fill('1900');
+  await expect(page.locator('#sell-attr-brand')).toHaveValue('Hero');
+  await page.locator('#sell-attr-brand').fill('Atlas');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await expect(page).toHaveURL(/\/l\//, { timeout: 20000 });
   await expect(page.locator('.detail-title')).toHaveText(editedTitle);
   await expect(page.locator('.price-ticket')).toContainText('1,900');
+  await expect(page.locator('.attr').filter({ hasText: 'Brand' })).toContainText('Atlas');
   await dismissToasts(page);
 
   // A second real account saves the first account's listing.

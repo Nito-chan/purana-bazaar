@@ -1,3 +1,5 @@
+import { DEFAULT_ATTRIBUTE_SCHEMAS } from '../../lib/category-attributes.js';
+
 const CATEGORIES = [
   { id: 'cat-mobiles', slug: 'mobiles', nameEn: 'Mobiles', nameHi: 'मोबाइल', sortOrder: 1 },
   { id: 'cat-laptops', slug: 'laptops', nameEn: 'Laptops', nameHi: 'लैपटॉप', sortOrder: 2 },
@@ -806,7 +808,10 @@ export function createSeed() {
   const hoursAgo = (hours) => new Date(now - hours * 3600000).toISOString();
   const daysAgo = (days) => new Date(now - days * 86400000).toISOString();
 
-  const categories = CATEGORIES.map((item) => ({ ...item }));
+  const categories = CATEGORIES.map((item) => ({
+    ...item,
+    attributesSchema: item.attributesSchema || DEFAULT_ATTRIBUTE_SCHEMAS[item.slug] || [],
+  }));
   const cities = CITIES.map((item) => ({ ...item }));
   const profiles = PROFILE_ROWS.map(({ key: _key, ...profile }) => ({ ...profile }));
   const profileByKey = new Map(PROFILE_ROWS.map((profile) => [profile.key, profile]));

@@ -10,6 +10,7 @@ import {
 } from '../lib/format.js';
 import { absoluteUrl, currentPath, listingPath, parseListingId } from '../lib/url.js';
 import { conditionLabel, categoryLabel, cityLabel, t } from '../i18n/index.js';
+import { displayAttributeEntries } from '../lib/category-attributes.js';
 import { isSignedIn, loginPath } from '../lib/auth.js';
 import { navigate } from '../lib/navigation.js';
 import { setPageTitle, setPageDescription } from '../lib/seo.js';
@@ -237,9 +238,11 @@ export async function render({ params }) {
     detailAttribute(t('listing.condition'), condition),
     detailAttribute(t('listing.category'), categoryLabel(listing.category)),
     detailAttribute(t('listing.city'), cityLabel(listing.city)),
-    detailAttribute(t('listing.area'), listing.area),
-    ...Object.entries(listing.attributes || {}).map(([key, value]) => detailAttribute(key, value)),
-  ];
+    listing.area ? detailAttribute(t('listing.area'), listing.area) : null,
+    ...displayAttributeEntries(listing.category, listing.attributes).map((entry) =>
+      detailAttribute(entry.label, entry.value),
+    ),
+  ].filter(Boolean);
 
   const seller = listing.seller;
   const sellerActive = sellerInfo?.activeCount ?? 0;

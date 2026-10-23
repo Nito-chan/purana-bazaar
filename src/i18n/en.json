@@ -238,7 +238,9 @@
     "updateError": "Couldn't update the listing. Please try again.",
     "titleHint": "Include the model or what makes it useful.",
     "priceHint": "Set a realistic price. You can mark it negotiable.",
-    "areaHint": "A landmark or neighbourhood helps buyers."
+    "areaHint": "A landmark or neighbourhood helps buyers.",
+    "categoryDetails": "Item specifics",
+    "categoryDetailsHint": "These details appear on your listing."
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -457,7 +459,9 @@
     "reportDetailsLong": "Keep details under 500 characters.",
     "messageRequired": "Write a message first.",
     "messageLong": "Keep the message under 1,000 characters.",
-    "required": "This field is required."
+    "required": "This field is required.",
+    "attributeRequired": "Add {label}.",
+    "attributeLong": "Keep {label} under {max} characters."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -504,5 +508,44 @@
     "body": "This action can't be undone.",
     "yes": "Yes, continue",
     "no": "Not now"
+  },
+  "attributes": {
+    "brand": "Brand",
+    "storage": "Storage",
+    "batteryHealth": "Battery health",
+    "box": "Box",
+    "processor": "Processor",
+    "ram": "RAM",
+    "material": "Material",
+    "size": "Size",
+    "capacity": "Capacity",
+    "type": "Type",
+    "year": "Year",
+    "kmDriven": "KM driven",
+    "owner": "Owner",
+    "insurance": "Insurance",
+    "gears": "Gears",
+    "frame": "Frame",
+    "class": "Class",
+    "subject": "Subject",
+    "language": "Language",
+    "power": "Power",
+    "model": "Model",
+    "color": "Colour",
+    "screen": "Screen",
+    "weight": "Weight",
+    "seats": "Seats",
+    "doors": "Doors",
+    "pieces": "Pieces",
+    "jars": "Jars",
+    "locker": "Locker",
+    "bluetooth": "Bluetooth",
+    "lens": "Lens",
+    "bag": "Bag",
+    "note": "Note",
+    "condition": "Condition",
+    "warranty": "Warranty",
+    "bill": "Bill",
+    "accessories": "Accessories"
   }
 }

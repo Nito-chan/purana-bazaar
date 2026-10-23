@@ -155,10 +155,16 @@ function galleryFor(listing, category) {
 
 function attributesFor(listing) {
   const attributes = {};
-  if (!listing.attributes || typeof listing.attributes !== 'object') return attributes;
-  for (const [key, value] of Object.entries(listing.attributes)) {
+  const source = listing?.attributes;
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return attributes;
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof value === 'boolean') {
+      attributes[String(key).slice(0, 40)] = value ? 'Yes' : 'No';
+      continue;
+    }
     if (typeof value !== 'string' && typeof value !== 'number') continue;
-    attributes[String(key).slice(0, 40)] = String(value).slice(0, 120);
+    const text = String(value).replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (text) attributes[String(key).slice(0, 40)] = text;
   }
   return attributes;
 }

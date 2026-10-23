@@ -70,6 +70,10 @@ test.describe('selling', () => {
     await page.locator('#sell-title').fill(title);
     await page.locator('#sell-price').fill('1800');
     await page.locator('#sell-category').selectOption({ label: 'Cycles' });
+    await expect(page.getByRole('heading', { name: 'Item specifics' })).toBeVisible();
+    await page.locator('#sell-attr-brand').fill('Hero');
+    await page.locator('#sell-attr-gears').fill('6');
+    await page.locator('#sell-attr-frame').fill('Steel');
     await page.locator('#sell-area').fill('Civil Lines');
     await page
       .locator('#sell-description')
@@ -88,6 +92,8 @@ test.describe('selling', () => {
     await expect(page.locator('.detail-title')).toHaveText(title);
     await expect(page.locator('.price-ticket')).toContainText('1,800');
     await expect(page.locator('.detail-media img')).toHaveCount(1);
+    await expect(page.locator('.attr').filter({ hasText: 'Brand' })).toContainText('Hero');
+    await expect(page.locator('.attr').filter({ hasText: 'Frame' })).toContainText('Steel');
     await expect(page.locator('.toast')).toContainText('Your listing is live');
     await dismissToasts(page);
 
@@ -98,11 +104,14 @@ test.describe('selling', () => {
     await row.getByRole('link', { name: 'Edit' }).click();
     await expect(page).toHaveURL(/\/sell\//);
     await expect(page.locator('#sell-title')).toHaveValue(title);
+    await expect(page.locator('#sell-attr-brand')).toHaveValue('Hero');
 
     await page.locator('#sell-price').fill('1900');
+    await page.locator('#sell-attr-brand').fill('Atlas');
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page).toHaveURL(/\/l\//);
     await expect(page.locator('.price-ticket')).toContainText('1,900');
+    await expect(page.locator('.attr').filter({ hasText: 'Brand' })).toContainText('Atlas');
     await expect(page.locator('.toast')).toContainText('Listing updated');
   });
 });

@@ -12,6 +12,13 @@ import { setPageTitle } from '../lib/seo.js';
 import { getSellDraft, saveSellDraft, clearSellDraft } from '../lib/storage.js';
 import { store } from '../store.js';
 import { validateListing } from '../lib/validation.js';
+import {
+  attributeFieldName,
+  attributeLabel,
+  normalizeAttributeSchema,
+  normalizeAttributeValues,
+  validateAttributeValues,
+} from '../lib/category-attributes.js';
 import { authRequiredState, errorState } from '../ui/auth-gate.js';
 import { icon } from '../ui/icons.js';
 import { toast } from '../ui/toast.js';
@@ -82,8 +89,16 @@ export async function render({ params, query = {} }) {
   const state = store.getState();
   const draft = !editing ? getSellDraft() : null;
   const initial = editing ? existing : draft && typeof draft === 'object' ? draft : {};
+  const initialAttributes =
+    initial.attributes &&
+    typeof initial.attributes === 'object' &&
+    !Array.isArray(initial.attributes)
+      ? { ...initial.attributes }
+      : {};
 
   let photos = editing ? (existing.images || []).map((image) => image.url) : [];
+  const attributeValues = { ...initialAttributes };
+  let activeCategory = null;
   let saving = false;
   let draftTimer = 0;
 
@@ -106,11 +121,11 @@ export async function render({ params, query = {} }) {
     if (input) input.removeAttribute('aria-invalid');
   }
 
-  function showError(name, messageKey) {
+  function showError(name, messageKey, params = {}) {
     const node = errorNodes.get(name);
     const input = inputs.get(name);
     if (!node) return;
-    node.replaceChildren(icon('alert-circle', { size: 15 }), h('span', {}, t(messageKey)));
+    node.replaceChildren(icon('alert-circle', { size: 15 }), h('span', {}, t(messageKey, params)));
     node.hidden = false;
     if (input) input.setAttribute('aria-invalid', 'true');
   }
@@ -217,6 +232,7 @@ export async function render({ params, query = {} }) {
         area: inputs.get('area')?.value || '',
         description: inputs.get('description')?.value || '',
         isNegotiable: Boolean(inputs.get('isNegotiable')?.checked),
+        attributes: { ...attributeValues },
       });
     }, 450);
   }
@@ -235,9 +251,13 @@ export async function render({ params, query = {} }) {
     state.cityId ||
     state.cities[0]?.id ||
     '';
-  const defaultCategory = state.categories.find((item) => item.slug === initial.category) || null;
-  const defaultCategoryId =
-    initial.categoryId || defaultCategory?.id || defaultPresetCategory?.id || '';
+  const defaultCategory =
+    state.categories.find((item) => item.id === initial.categoryId) ||
+    state.categories.find((item) => item.slug === initial.category) ||
+    defaultPresetCategory ||
+    null;
+  const defaultCategoryId = defaultCategory?.id || '';
+  activeCategory = defaultCategory;
 
   const titleInput = input(
     'title',
@@ -286,7 +306,12 @@ export async function render({ params, query = {} }) {
         id: 'sell-category',
         name: 'categoryId',
         'aria-describedby': 'sell-categoryId-error',
-        onChange: scheduleDraft,
+        onChange: () => {
+          activeCategory =
+            state.categories.find((category) => category.id === categorySelect.value) || null;
+          renderCategoryAttributes();
+          scheduleDraft();
+        },
       },
       h('option', { value: '' }, t('sell.categoryPlaceholder')),
       state.categories.map((category) =>
@@ -298,6 +323,102 @@ export async function render({ params, query = {} }) {
       ),
     ),
   );
+
+  const attributesHost = h('div', { class: 'category-attributes', hidden: true });
+
+  function renderCategoryAttributes() {
+    for (const name of [...errorNodes.keys()]) {
+      if (!name.startsWith('attr-')) continue;
+      errorNodes.delete(name);
+      inputs.delete(name);
+    }
+
+    const schema = normalizeAttributeSchema(activeCategory?.attributesSchema);
+    if (!activeCategory || !schema.length) {
+      attributesHost.hidden = true;
+      attributesHost.replaceChildren();
+      return;
+    }
+
+    const fields = schema.map((field) => {
+      const name = attributeFieldName(field.key);
+      const inputId = `sell-${name}`;
+      const raw = attributeValues[field.key];
+      const value = raw === undefined || raw === null ? '' : String(raw);
+
+      if (field.type === 'boolean') {
+        const checkbox = input(
+          name,
+          h('input', {
+            type: 'checkbox',
+            id: inputId,
+            name,
+            checked: raw === true || /^(yes|true)$/i.test(value),
+            'aria-describedby': `${inputId}-error`,
+            'aria-required': field.required ? 'true' : null,
+            onChange: (event) => {
+              attributeValues[field.key] = event.currentTarget.checked ? 'Yes' : 'No';
+              scheduleDraft();
+            },
+          }),
+        );
+        return h(
+          'div',
+          { class: 'field category-attributes__boolean' },
+          h(
+            'label',
+            { class: 'checkbox', for: inputId },
+            checkbox,
+            h('span', {}, attributeLabel(field.key)),
+          ),
+          fieldError(name),
+        );
+      }
+
+      const textInput = input(
+        name,
+        h('input', {
+          class: 'field__input',
+          id: inputId,
+          name,
+          type: 'text',
+          maxlength: String(field.maxLength),
+          value,
+          autocomplete: 'off',
+          'aria-describedby': `${inputId}-error`,
+          'aria-required': field.required ? 'true' : null,
+          onInput: (event) => {
+            attributeValues[field.key] = event.currentTarget.value;
+            scheduleDraft();
+          },
+        }),
+      );
+
+      return h(
+        'div',
+        { class: 'field' },
+        h(
+          'label',
+          { class: 'field__label', for: inputId },
+          h('span', {}, attributeLabel(field.key)),
+          field.required ? null : h('span', { class: 'field__optional' }, t('common.optional')),
+        ),
+        textInput,
+        fieldError(name),
+      );
+    });
+
+    attributesHost.replaceChildren(
+      h(
+        'div',
+        { class: 'category-attributes__head' },
+        h('h3', { class: 'category-attributes__title' }, t('sell.categoryDetails')),
+        h('p', { class: 'field__hint' }, t('sell.categoryDetailsHint')),
+      ),
+      h('div', { class: 'category-attributes__grid' }, fields),
+    );
+    attributesHost.hidden = false;
+  }
 
   const conditionSelect = input(
     'condition',
@@ -386,6 +507,11 @@ export async function render({ params, query = {} }) {
         if (saving) return;
         clearAllErrors();
 
+        const selectedCategory =
+          state.categories.find((category) => category.id === categorySelect.value) || null;
+        activeCategory = selectedCategory;
+        const attributeSchema = normalizeAttributeSchema(selectedCategory?.attributesSchema);
+
         const values = {
           title: titleInput.value.trim(),
           price: parsePriceInput(priceInput.value),
@@ -395,6 +521,7 @@ export async function render({ params, query = {} }) {
           cityId: citySelect.value,
           area: areaInput.value.trim(),
           description: descriptionInput.value.trim(),
+          attributes: normalizeAttributeValues(attributeSchema, attributeValues),
         };
 
         let invalid = false;
@@ -414,6 +541,13 @@ export async function render({ params, query = {} }) {
             invalid = true;
           }
         }
+
+        const attributeErrors = validateAttributeValues(attributeSchema, attributeValues);
+        for (const [key, error] of Object.entries(attributeErrors)) {
+          showError(attributeFieldName(key), error.key, error.params);
+          invalid = true;
+        }
+
         if (invalid) {
           const firstInvalid = document.querySelector('[aria-invalid="true"]');
           (firstInvalid || photoGrid).focus({ preventScroll: false });
@@ -487,6 +621,7 @@ export async function render({ params, query = {} }) {
           categorySelect,
           fieldError('categoryId'),
         ),
+        attributesHost,
         h(
           'div',
           { class: 'field' },
@@ -558,6 +693,7 @@ export async function render({ params, query = {} }) {
   );
 
   renderPhotos();
+  renderCategoryAttributes();
 
   return h(
     'div',
