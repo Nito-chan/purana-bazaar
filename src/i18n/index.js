@@ -1,8 +1,24 @@
-import en from './en.json';
-import hi from './hi.json';
+let enDict = null;
+let hiDict = null;
 
-const dictionaries = { en, hi };
-let currentLanguage = 'en';
+function loadDict(lang) {
+  const promise = import(`./${lang}.json`).then((m) => m.default);
+  if (lang === 'en') {
+    promise.then((d) => {
+      enDict = d;
+    });
+  } else {
+    promise.then((d) => {
+      hiDict = d;
+    });
+  }
+  return promise;
+}
+
+// Start loading both dictionaries immediately. They are fetched in a
+// separate chunk so the entry bundle stays small.
+loadDict('en');
+loadDict('hi');
 
 function resolve(dictionary, key) {
   const parts = String(key ?? '').split('.');
@@ -21,6 +37,8 @@ function interpolate(template, params) {
   );
 }
 
+let currentLanguage = 'en';
+
 export function setLanguage(language) {
   currentLanguage = language === 'hi' ? 'hi' : 'en';
   if (typeof document !== 'undefined') {
@@ -36,23 +54,23 @@ export function getLanguage() {
 export function t(key, params = {}) {
   if (!key) return '';
 
-  const dictionary = dictionaries[currentLanguage] ?? en;
+  const dictionary = currentLanguage === 'hi' ? hiDict : enDict;
   let value;
 
   if (params.count !== undefined) {
     const suffix = Number(params.count) === 1 ? 'one' : 'other';
-    value = resolve(dictionary, `${key}_${suffix}`) ?? resolve(en, `${key}_${suffix}`);
+    value = resolve(dictionary, `${key}_${suffix}`) ?? resolve(enDict, `${key}_${suffix}`);
   }
 
   if (value === undefined) value = resolve(dictionary, key);
-  if (value === undefined) value = resolve(en, key);
+  if (value === undefined) value = resolve(enDict, key);
   if (value === undefined) return String(key);
 
   return interpolate(value, params);
 }
 
 export function hasKey(key, language = currentLanguage) {
-  return resolve(dictionaries[language] ?? en, key) !== undefined;
+  return resolve(language === 'hi' ? hiDict : enDict, key) !== undefined;
 }
 
 export function errorMessage(error, fallbackKey = 'errors.generic') {

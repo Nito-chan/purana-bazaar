@@ -64,6 +64,21 @@ const routes = [
     load: () => import('./pages/admin.js'),
   },
   {
+    name: 'terms',
+    pattern: /^\/terms\/?$/,
+    load: () => import('./pages/terms.js'),
+  },
+  {
+    name: 'privacy',
+    pattern: /^\/privacy\/?$/,
+    load: () => import('./pages/privacy.js'),
+  },
+  {
+    name: 'accountDelete',
+    pattern: /^\/account\/delete\/?$/,
+    load: () => import('./pages/account-delete.js'),
+  },
+  {
     name: 'wanted',
     pattern: /^\/wanted\/?$/,
     load: () => import('./pages/wanted.js'),

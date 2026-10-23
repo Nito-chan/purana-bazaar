@@ -25,6 +25,11 @@ export default defineConfig(({ mode }) => {
       target: 'es2019',
       manifest: true,
       sourcemap: false,
+      manualChunks: (id) => {
+        if (id.includes('i18n/en.json') || id.includes('i18n/hi.json')) {
+          return 'i18n-dict';
+        }
+      },
     },
   };
 });
