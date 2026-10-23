@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
       - name: Sync Capacitor web assets
-        run: npx cap sync
+        run: npx -y @capacitor/cli sync
 
       - name: Set up Java JDK 17
         uses: actions/setup-java@v4
