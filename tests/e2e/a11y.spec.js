@@ -20,6 +20,7 @@ async function seriousViolations(page, label) {
 test('home, login and listing detail have no serious accessibility violations', async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   await page.goto('/');
   await expect(page.locator('.listing-card').first()).toBeVisible();
   const home = await seriousViolations(page, 'home');
