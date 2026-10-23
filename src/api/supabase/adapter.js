@@ -884,6 +884,146 @@ export function createSupabaseApi() {
       },
     },
 
+    savedSearches: {
+      async list() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('saved_searches')
+          .select('id, name, query, notify, created_at')
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          name: item.name,
+          query: item.query,
+          notify: item.notify,
+          createdAt: item.created_at,
+        }));
+      },
+
+      async create(values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('saved_searches')
+          .insert({
+            name: values.name,
+            query: values.query,
+            notify: values.notify !== false,
+          })
+          .select('id, name, query, notify, created_at')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return {
+          id: data.id,
+          name: data.name,
+          query: data.query,
+          notify: data.notify,
+          createdAt: data.created_at,
+        };
+      },
+
+      async update(id, values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('saved_searches')
+          .update({
+            name: values.name,
+            query: values.query,
+            notify: values.notify,
+          })
+          .eq('id', id)
+          .select('id, name, query, notify, created_at')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return {
+          id: data.id,
+          name: data.name,
+          query: data.query,
+          notify: data.notify,
+          createdAt: data.created_at,
+        };
+      },
+
+      async delete(id) {
+        await currentUserId();
+        const { error } = await supabase.from('saved_searches').delete().eq('id', id);
+        if (error) throw toApiError(error, 'errors.deleteFailed');
+        return { ok: true };
+      },
+    },
+
+    wantedPosts: {
+      async list() {
+        const { data, error } = await supabase
+          .from('wanted_posts')
+          .select(
+            'id, user_id, city_id, category_id, title, description, budget, status, created_at, expires_at, user:profiles(name)',
+          )
+          .eq('status', 'open')
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          userId: item.user_id,
+          posterName: item.user?.name || '',
+          cityId: item.city_id,
+          categoryId: item.category_id,
+          title: item.title,
+          description: item.description,
+          budget: item.budget,
+          status: item.status,
+          createdAt: item.created_at,
+          expiresAt: item.expires_at,
+        }));
+      },
+
+      async create(values) {
+        const userId = await currentUserId();
+        const { data, error } = await supabase
+          .from('wanted_posts')
+          .insert({
+            user_id: userId,
+            city_id: values.cityId,
+            category_id: values.categoryId,
+            title: values.title,
+            description: values.description,
+            budget: values.budget,
+            status: 'open',
+          })
+          .select('id')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return { id: data.id };
+      },
+
+      async update(id, values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('wanted_posts')
+          .update({
+            title: values.title,
+            description: values.description,
+            city_id: values.cityId,
+            category_id: values.categoryId,
+            budget: values.budget,
+            status: values.status,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .select('id')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return { id: data.id };
+      },
+
+      async delete(id) {
+        await currentUserId();
+        const { error } = await supabase.from('wanted_posts').delete().eq('id', id);
+        if (error) throw toApiError(error, 'errors.deleteFailed');
+        return { ok: true };
+      },
+    },
+
     meta: {
       async counts() {
         const { data, error } = await supabase.rpc('get_meta_counts');

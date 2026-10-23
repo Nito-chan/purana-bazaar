@@ -56,8 +56,10 @@ does not include `@supabase/supabase-js`.
 /saved                     saved listings
 /chats, /chat/:id          conversations
 /notifications             notifications
+/saved-searches            saved searches
 /u/:id                     seller profile
-/admin, /wanted            placeholders
+/wanted                    wanted board
+/admin                     placeholder
 *                          404
 ```
 
@@ -130,15 +132,15 @@ This is intentional: no fake production content.
 
 ## 5. Phase tracker
 
-| Phase | Scope                                                                     | State        |
-| ----- | ------------------------------------------------------------------------- | ------------ |
-| 0     | Mock app, routing, design system, all core screens, tests                 | **Complete** |
-| 1     | Supabase schema, RLS, real auth, feed, storage, chats, safety             | **Complete** |
-| 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | **Complete** |
-| 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | In progress  |
-| 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | Not started  |
-| 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started  |
-| 6     | Android app, FCM, Play Store release                                      | Not started  |
+| Phase | Scope                                                                     | State               |
+| ----- | ------------------------------------------------------------------------- | ------------------- |
+| 0     | Mock app, routing, design system, all core screens, tests                 | **Complete**        |
+| 1     | Supabase schema, RLS, real auth, feed, storage, chats, safety             | **Complete**        |
+| 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | **Complete**        |
+| 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | **Complete**        |
+| 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | **Complete** (core) |
+| 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started         |
+| 6     | Android app, FCM, Play Store release                                      | Not started         |
 
 Phase 2 must not start until the Phase 1 gate is signed off. The Phase 1 functional gate is now
 green; the remaining launch items are configuration and deployment, not schema work.
@@ -155,6 +157,20 @@ green; the remaining launch items are configuration and deployment, not schema w
   not provisioned on this project, and adding the client breaks the strict mock bundle budget. To
   activate: provision Realtime, restore the `subscribeToConversation` subscription in `chat.js`,
   and re-verify the mock bundle budget.
+
+### Phase 4 status
+
+- **PWA:** delivered — `public/manifest.json`, `public/sw.js`, and service-worker registration in
+  `main.js`. Installable on Android/desktop; works offline for the app shell.
+- **Saved searches:** delivered — `/saved-searches` lists saved searches, lets users name/apply/
+  edit/delete them, and toggle new-match notifications. A "Save search" button on the home feed
+  captures the current filters.
+- **Wanted board:** delivered — `/wanted` replaces the placeholder; buyers can post, view, edit,
+  close, and delete wanted posts (public read, owner write).
+- **SEO:** page titles, descriptions, and Open Graph tags already present on all pages;
+  per-listing OG images deferred to a later edge-function/prerender decision.
+- **Deferred (external/infra):** push notifications (VAPID + push service), referrals (reward
+  tracking), per-listing OG edge function.
 
 ---
 
@@ -173,7 +189,7 @@ green; the remaining launch items are configuration and deployment, not schema w
 - Expansion gate: 300 active listings and 100 contact events/week for four consecutive weeks. New
   cities need 50–100 real listings before opening.
 - Per-listing OG images require an edge function or prerender (a pure SPA cannot generate distinct
-  previews); deferred to Phase 4. The listing detail share button and static OG are already present.
+  previews); deferred beyond Phase 4. The listing detail share button and static OG are already present.
 
 ### Before the first public demo
 

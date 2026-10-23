@@ -100,6 +100,7 @@ export function renderHeader(header) {
         { class: 'header-nav', 'aria-label': t('nav.primary') },
         navLink('/', 'nav.home', route === 'home' || route === 'landing'),
         navLink('/saved', 'nav.saved', route === 'saved'),
+        navLink('/wanted', 'nav.wanted', route === 'wanted'),
         navLink('/chats', 'nav.chats', route === 'chats' || route === 'chat'),
         h(
           'a',

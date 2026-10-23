@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.3] — 2026-10-23
+
+### Added
+
+- Wanted board (`/wanted`): post, view, edit, close and delete wanted posts; public read, owner write; English and Hindi translations.
+- Saved searches (`/saved-searches`): save current home filters with a name, apply/edit/delete them, toggle new-match notifications; "Save search" button on the home feed captures current filters.
+- PWA: `public/manifest.json` and `public/sw.js` with service-worker registration; installable on Android/desktop; app shell works offline.
+- Header: "Wanted" navigation link added to top nav and profile menu.
+- Hindi translations for wanted board, saved searches and PWA strings.
+
+### Fixed
+
+- Header nav now scrolls horizontally on tablet so the new link doesn't overflow.
+
 ## [0.2.2] — 2026-10-23
 
 ### Added

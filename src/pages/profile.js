@@ -126,6 +126,11 @@ export async function render() {
       meta: t('common.item', { count: savedCount }),
     }),
     menuRow({
+      href: '/saved-searches',
+      iconName: 'list',
+      title: t('profile.savedSearches'),
+    }),
+    menuRow({
       href: '/notifications',
       iconName: 'bell',
       title: t('profile.notifications'),

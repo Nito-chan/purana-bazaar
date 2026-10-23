@@ -75,3 +75,11 @@ async function boot() {
 }
 
 boot();
+
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Service worker registration is optional; the app works without it.
+    });
+  });
+}

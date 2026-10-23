@@ -10,6 +10,8 @@ const namespaces = [
   'blocks',
   'reports',
   'reviews',
+  'savedSearches',
+  'wantedPosts',
   'meta',
 ];
 

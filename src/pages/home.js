@@ -14,6 +14,8 @@ import { emptyState } from '../ui/empty.js';
 import { errorState } from '../ui/auth-gate.js';
 import { skeletonCard } from '../ui/skeleton.js';
 import { listingCard } from '../ui/listing-card.js';
+import { isSignedIn } from '../lib/auth.js';
+import { toast } from '../ui/toast.js';
 
 const PAGE_SIZE = 20;
 
@@ -716,6 +718,99 @@ export function render() {
   loadFeed(true);
   loadFeatured();
 
+  const signedIn = isSignedIn();
+  const saveSearchButton = signedIn
+    ? h(
+        'button',
+        {
+          class: 'btn btn--secondary btn--sm',
+          type: 'button',
+          'aria-label': t('savedSearches.create'),
+          onClick: () => openSaveSearchSheet(),
+        },
+        t('savedSearches.create'),
+      )
+    : null;
+
+  async function openSaveSearchSheet() {
+    const nameInput = h('input', {
+      class: 'field__input',
+      type: 'text',
+      id: 'save-search-name',
+      placeholder: t('savedSearches.namePlaceholder'),
+      'aria-label': t('savedSearches.name'),
+      maxlength: '80',
+    });
+    const errorBox = h('div', { role: 'alert' });
+
+    const form = h(
+      'form',
+      {
+        class: 'form',
+        onSubmit: async (event) => {
+          event.preventDefault();
+          errorBox.replaceChildren();
+          const name = String(nameInput.value ?? '')
+            .trim()
+            .slice(0, 80);
+          if (!name) {
+            errorBox.appendChild(
+              h(
+                'p',
+                { class: 'field__error' },
+                icon('alert-circle', { size: 16 }),
+                h('span', {}, t('savedSearches.invalidName')),
+              ),
+            );
+            nameInput.focus();
+            return;
+          }
+          try {
+            await api.savedSearches.create({
+              name,
+              query: {
+                q: filters.q,
+                category: filters.category,
+                min: filters.min,
+                max: filters.max,
+                condition: filters.condition,
+                photos: filters.photos,
+                sort: filters.sort,
+                cityId: state.cityId,
+              },
+            });
+            toast.success(t('savedSearches.created'));
+            handle.close();
+          } catch {
+            toast.error(t('common.genericError'));
+          }
+        },
+      },
+      h(
+        'div',
+        { class: 'field' },
+        h('label', { class: 'field__label', for: 'save-search-name' }, t('savedSearches.name')),
+        nameInput,
+      ),
+      errorBox,
+      h(
+        'div',
+        { class: 'form__actions' },
+        h(
+          'button',
+          { class: 'btn btn--secondary', type: 'button', onClick: () => handle.close() },
+          t('common.cancel'),
+        ),
+        h('button', { class: 'btn btn--primary', type: 'submit' }, t('common.save')),
+      ),
+    );
+
+    const handle = openSheet({
+      title: t('savedSearches.create'),
+      content: form,
+    });
+  }
+
   return h(
     'div',
     { class: 'container page' },
@@ -726,7 +821,7 @@ export function render() {
       'div',
       { class: 'home-toolbar' },
       h('div', { class: 'home-toolbar__filters' }, filterTrigger),
-      h('div', { class: 'home-toolbar__right' }, sortSelect),
+      h('div', { class: 'home-toolbar__right' }, sortSelect, saveSearchButton),
     ),
     activeFilters,
     h(

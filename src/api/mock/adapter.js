@@ -18,6 +18,8 @@ const db = {
   notifications: seed.notifications,
   reports: [],
   reviews: [],
+  savedSearches: [],
+  wantedPosts: [],
 };
 
 const favouriteSets = new Map([[DEMO_USER_ID, new Set(seed.favouriteIds)]]);
@@ -1039,6 +1041,189 @@ export function createMockApi() {
           };
           db.reviews.push(review);
           return { ...review, reviewerName: user.name };
+        });
+      },
+    },
+
+    savedSearches: {
+      list() {
+        return respond(() => {
+          const user = currentUser();
+          return db.savedSearches
+            .filter((item) => item.userId === user.id)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const name = String(values.name ?? '')
+            .trim()
+            .slice(0, 80);
+          if (!name) {
+            throw new ApiError(
+              'INVALID_NAME',
+              'Give your search a name.',
+              'savedSearches.invalidName',
+            );
+          }
+          const query = values.query && typeof values.query === 'object' ? values.query : {};
+          const item = {
+            id: newId(),
+            userId: user.id,
+            name,
+            query,
+            notify: values.notify !== false,
+            createdAt: nowIso(),
+          };
+          db.savedSearches.push(item);
+          return item;
+        });
+      },
+
+      update(id, values) {
+        return respond(() => {
+          const user = currentUser();
+          const item = db.savedSearches.find((item) => item.id === id && item.userId === user.id);
+          if (!item) throw notFound('Saved search not found.');
+          if (values.name !== undefined) {
+            const name = String(values.name).trim().slice(0, 80);
+            if (!name) {
+              throw new ApiError(
+                'INVALID_NAME',
+                'Give your search a name.',
+                'savedSearches.invalidName',
+              );
+            }
+            item.name = name;
+          }
+          if (values.query !== undefined) item.query = values.query;
+          if (values.notify !== undefined) item.notify = values.notify;
+          return item;
+        });
+      },
+
+      delete(id) {
+        return respond(() => {
+          const user = currentUser();
+          const index = db.savedSearches.findIndex(
+            (item) => item.id === id && item.userId === user.id,
+          );
+          if (index === -1) throw notFound('Saved search not found.');
+          db.savedSearches.splice(index, 1);
+          return { ok: true };
+        });
+      },
+    },
+
+    wantedPosts: {
+      list() {
+        return respond(() => {
+          return db.wantedPosts
+            .filter((item) => item.status === 'open')
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((item) => {
+              const poster = findProfile(item.userId);
+              return {
+                id: item.id,
+                userId: item.userId,
+                posterName: poster ? poster.name : '',
+                cityId: item.cityId,
+                categoryId: item.categoryId,
+                title: item.title,
+                description: item.description,
+                budget: item.budget,
+                status: item.status,
+                createdAt: item.createdAt,
+                expiresAt: item.expiresAt,
+              };
+            });
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const title = String(values.title ?? '')
+            .trim()
+            .slice(0, 80);
+          if (!title) {
+            throw new ApiError('INVALID_TITLE', 'Add a title.', 'wantedPosts.invalidTitle');
+          }
+          const description = String(values.description ?? '')
+            .trim()
+            .slice(0, 1000);
+          const budget =
+            values.budget === null || values.budget === undefined ? null : Number(values.budget);
+          if (budget !== null && (!Number.isInteger(budget) || budget < 0)) {
+            throw new ApiError(
+              'INVALID_BUDGET',
+              'Enter a valid budget.',
+              'wantedPosts.invalidBudget',
+            );
+          }
+          const item = {
+            id: newId(),
+            userId: user.id,
+            cityId: values.cityId || null,
+            categoryId: values.categoryId || null,
+            title,
+            description,
+            budget,
+            status: 'open',
+            createdAt: nowIso(),
+            updatedAt: nowIso(),
+            expiresAt: addDays(30),
+          };
+          db.wantedPosts.push(item);
+          return item;
+        });
+      },
+
+      update(id, values) {
+        return respond(() => {
+          const user = currentUser();
+          const item = db.wantedPosts.find((item) => item.id === id && item.userId === user.id);
+          if (!item) throw notFound('Wanted post not found.');
+          if (values.title !== undefined) {
+            const title = String(values.title).trim().slice(0, 80);
+            if (!title) {
+              throw new ApiError('INVALID_TITLE', 'Add a title.', 'wantedPosts.invalidTitle');
+            }
+            item.title = title;
+          }
+          if (values.description !== undefined)
+            item.description = String(values.description).slice(0, 1000);
+          if (values.cityId !== undefined) item.cityId = values.cityId;
+          if (values.categoryId !== undefined) item.categoryId = values.categoryId;
+          if (values.budget !== undefined) {
+            const budget =
+              values.budget === null || values.budget === undefined ? null : Number(values.budget);
+            if (budget !== null && (!Number.isInteger(budget) || budget < 0)) {
+              throw new ApiError(
+                'INVALID_BUDGET',
+                'Enter a valid budget.',
+                'wantedPosts.invalidBudget',
+              );
+            }
+            item.budget = budget;
+          }
+          if (values.status !== undefined) item.status = values.status;
+          item.updatedAt = nowIso();
+          return item;
+        });
+      },
+
+      delete(id) {
+        return respond(() => {
+          const user = currentUser();
+          const index = db.wantedPosts.findIndex(
+            (item) => item.id === id && item.userId === user.id,
+          );
+          if (index === -1) throw notFound('Wanted post not found.');
+          db.wantedPosts.splice(index, 1);
+          return { ok: true };
         });
       },
     },

@@ -154,6 +154,18 @@
 
   .header-nav {
     display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-width: 0;
+  }
+
+  .header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-nav__link {
+    flex: none;
+    white-space: nowrap;
   }
 
   .header-tagline {

@@ -35,6 +35,11 @@ const routes = [
     load: () => import('./pages/my-listings.js'),
   },
   { name: 'saved', pattern: /^\/saved\/?$/, load: () => import('./pages/saved.js') },
+  {
+    name: 'savedSearches',
+    pattern: /^\/saved-searches\/?$/,
+    load: () => import('./pages/saved-searches.js'),
+  },
   { name: 'chats', pattern: /^\/chats\/?$/, load: () => import('./pages/chats.js') },
   {
     name: 'chat',
@@ -62,8 +67,7 @@ const routes = [
   {
     name: 'wanted',
     pattern: /^\/wanted\/?$/,
-    load: () => import('./pages/info.js'),
-    variant: 'wanted',
+    load: () => import('./pages/wanted.js'),
   },
   {
     name: 'landing',

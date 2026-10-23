@@ -69,7 +69,8 @@
     "sell": "Sell",
     "chats": "Chats",
     "profile": "Profile",
-    "primary": "Primary"
+    "primary": "Primary",
+    "wanted": "Wanted"
   },
   "header": {
     "switchToHindi": "Switch language to Hindi",
@@ -310,7 +311,8 @@
     "statsListings": "Listings",
     "statsSold": "Sold",
     "statsSaved": "Saved",
-    "demoNote": "Demo profile — data resets when you reload."
+    "demoNote": "Demo profile — data resets when you reload.",
+    "savedSearches": "Saved searches"
   },
   "myListings": {
     "title": "My listings",
@@ -570,5 +572,52 @@
     "alreadyReviewed": "You've already reviewed this seller.",
     "notYourself": "You can't review your own profile.",
     "invalidRating": "Rating must be between 1 and 5."
+  },
+  "savedSearches": {
+    "title": "Saved searches",
+    "subtitle": "Track new listings that match your saved searches.",
+    "emptyTitle": "No saved searches yet",
+    "emptyBody": "Save a search from the home feed to track new matches.",
+    "invalidName": "Give your search a name.",
+    "name": "Search name",
+    "namePlaceholder": "e.g. iPhones under ₹20,000",
+    "apply": "Apply search",
+    "edit": "Edit name",
+    "delete": "Delete",
+    "confirmDelete": "Delete this saved search?",
+    "deleted": "Saved search removed",
+    "created": "Search saved",
+    "updated": "Search updated",
+    "notify": "Notify me of new matches",
+    "create": "Save search"
+  },
+  "wantedPosts": {
+    "title": "Wanted board",
+    "subtitle": "Buyers post what they are looking for.",
+    "emptyTitle": "No wanted posts yet",
+    "emptyBody": "Be the first to post what you need.",
+    "create": "Post what you need",
+    "myPosts": "My wanted posts",
+    "post": "Post",
+    "updating": "Updating…",
+    "titleLabel": "What do you need?",
+    "titlePlaceholder": "e.g. iPhone 11, good condition",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Brand, model, condition, any flaws…",
+    "budgetLabel": "Budget (₹)",
+    "budgetPlaceholder": "e.g. 15000",
+    "cityLabel": "City",
+    "categoryLabel": "Category",
+    "invalidTitle": "Add a title.",
+    "invalidBudget": "Enter a valid budget.",
+    "posted": "Wanted post created",
+    "updated": "Wanted post updated",
+    "deleted": "Wanted post removed",
+    "confirmDelete": "Delete this wanted post?",
+    "closed": "Marked as closed",
+    "poster": "Posted by {name}",
+    "expires": "Expires {date}",
+    "delete": "Delete",
+    "edit": "Edit"
   }
 }
