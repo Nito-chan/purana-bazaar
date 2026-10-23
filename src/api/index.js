@@ -12,6 +12,10 @@ const namespaces = [
   'reviews',
   'savedSearches',
   'wantedPosts',
+  'promotions',
+  'payments',
+  'accountDeletionRequests',
+  'admin',
   'meta',
 ];
 

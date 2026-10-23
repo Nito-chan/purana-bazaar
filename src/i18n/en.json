@@ -432,7 +432,8 @@
   "admin": {
     "title": "Admin tools",
     "body": "Moderation, reports and category management arrive in Phase 5.",
-    "notAllowed": "This area is for admins only."
+    "notAllowed": "This area is for admins only.",
+    "invalidBanner": "Banner title and image are required."
   },
   "wanted": {
     "title": "Looking for something?",
@@ -478,7 +479,7 @@
     "authRequired": "Sign in to continue.",
     "notFound": "We couldn't find that.",
     "loadFailed": "We couldn't load this. Check your connection and try again.",
-    "saveFailed": "We couldn't save that. Please try again.",
+    "saveFailed": "Couldn't save. Please try again.",
     "contactFailed": "We couldn't reveal the contact details. Please try again.",
     "favouriteFailed": "Couldn't update saved items. Please try again.",
     "chatFailed": "Couldn't open the chat. Please try again.",
@@ -494,7 +495,9 @@
     "blocked": "This seller is blocked.",
     "confirmEmail": "Check your email and confirm your account, then sign in.",
     "noSession": "Your session expired. Please sign in again.",
-    "reviewFailed": "Couldn't save your review. Please try again."
+    "reviewFailed": "Couldn't save your review. Please try again.",
+    "forbidden": "Admin only.",
+    "deleteFailed": "Couldn't delete. Please try again."
   },
   "footer": {
     "tagline": "Good things, second time around.",
@@ -619,5 +622,13 @@
     "expires": "Expires {date}",
     "delete": "Delete",
     "edit": "Edit"
+  },
+  "promotions": {
+    "notOwner": "You can only boost your own listings.",
+    "alreadyBoosted": "This listing already has an active boost."
+  },
+  "accountDeletionRequests": {
+    "pendingDeletion": "You already have a pending deletion request.",
+    "cannotCancel": "Only pending requests can be cancelled."
   }
 }

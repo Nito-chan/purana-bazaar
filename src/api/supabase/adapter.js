@@ -1024,6 +1024,423 @@ export function createSupabaseApi() {
       },
     },
 
+    promotions: {
+      async list() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('promotions')
+          .select('id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at')
+          .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          userId: item.user_id,
+          listingId: item.listing_id,
+          productId: item.product_id,
+          paymentId: item.payment_id,
+          status: item.status,
+          startsAt: item.starts_at,
+          expiresAt: item.expires_at,
+          createdAt: item.created_at,
+        }));
+      },
+
+      async create(values) {
+        await currentUserId();
+        // Verify the listing belongs to the user.
+        const { data: listing, error: listingError } = await supabase
+          .from('listings')
+          .select('id, seller_id')
+          .eq('id', values.listingId)
+          .single();
+        if (listingError || !listing) throw notFound('Listing not found.');
+        if (listing.seller_id !== (await supabase.auth.getSession()).data.session?.user.id) {
+          throw new ApiError('NOT_OWNER', 'You can only boost your own listings.', 'promotions.notOwner');
+        }
+
+        // Verify the product exists and is active.
+        const { data: product, error: productError } = await supabase
+          .from('promotion_products')
+          .select('id, duration_days, price_inr, is_active')
+          .eq('id', values.productId)
+          .eq('is_active', true)
+          .single();
+        if (productError || !product) throw notFound('Boost product not found.');
+
+        // Check for existing active boost.
+        const { data: existing } = await supabase
+          .from('promotions')
+          .select('id')
+          .eq('listing_id', values.listingId)
+          .eq('status', 'active')
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle();
+        if (existing) {
+          throw new ApiError('ALREADY_BOOSTED', 'This listing already has an active boost.', 'promotions.alreadyBoosted');
+        }
+
+        // Create payment record.
+        const { data: payment, error: paymentError } = await supabase
+          .from('payments')
+          .insert({
+            user_id: (await supabase.auth.getSession()).data.session?.user.id,
+            provider: 'razorpay',
+            provider_order_id: `mock_${crypto.randomUUID()}`,
+            provider_payment_id: `mock_pay_${crypto.randomUUID()}`,
+            amount_inr: product.price_inr,
+            currency: 'INR',
+            status: 'paid',
+            raw_payload: { mock: true },
+          })
+          .select('id')
+          .single();
+        if (paymentError) throw toApiError(paymentError, 'errors.saveFailed');
+
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + product.duration_days * 86400000).toISOString();
+
+        const { data: promotion, error: promotionError } = await supabase
+          .from('promotions')
+          .insert({
+            user_id: (await supabase.auth.getSession()).data.session?.user.id,
+            listing_id: values.listingId,
+            product_id: product.id,
+            payment_id: payment.id,
+            status: 'active',
+            starts_at: now.toISOString(),
+            expires_at: expiresAt,
+          })
+          .select('id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at')
+          .single();
+        if (promotionError) throw toApiError(promotionError, 'errors.saveFailed');
+
+        // Mark the listing as featured while the boost is active.
+        await supabase
+          .from('listings')
+          .update({ is_featured: true })
+          .eq('id', values.listingId);
+
+        return {
+          id: promotion.id,
+          listingId: promotion.listing_id,
+          productId: promotion.product_id,
+          paymentId: promotion.payment_id,
+          status: promotion.status,
+          startsAt: promotion.starts_at,
+          expiresAt: promotion.expires_at,
+          createdAt: promotion.created_at,
+        };
+      },
+    },
+
+    payments: {
+      async list() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('payments')
+          .select('id, provider_order_id, amount_inr, currency, status, created_at')
+          .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          providerOrderId: item.provider_order_id,
+          amountInr: item.amount_inr,
+          currency: item.currency,
+          status: item.status,
+          createdAt: item.created_at,
+        }));
+      },
+
+      async create(values) {
+        await currentUserId();
+        const { data: product, error: productError } = await supabase
+          .from('promotion_products')
+          .select('id, price_inr, is_active')
+          .eq('id', values.productId)
+          .eq('is_active', true)
+          .single();
+        if (productError || !product) throw notFound('Boost product not found.');
+
+        const { data: payment, error: error } = await supabase
+          .from('payments')
+          .insert({
+            user_id: (await supabase.auth.getSession()).data.session?.user.id,
+            provider: 'razorpay',
+            provider_order_id: `mock_${crypto.randomUUID()}`,
+            provider_payment_id: null,
+            amount_inr: product.price_inr,
+            currency: 'INR',
+            status: 'created',
+            raw_payload: { mock: true },
+          })
+          .select('id, provider_order_id, amount_inr, currency, status, created_at')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return {
+          id: payment.id,
+          providerOrderId: payment.provider_order_id,
+          amountInr: payment.amount_inr,
+          currency: payment.currency,
+          status: payment.status,
+          createdAt: payment.created_at,
+        };
+      },
+    },
+
+    accountDeletionRequests: {
+      async list() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('account_deletion_requests')
+          .select('id, reason, status, requested_at')
+          .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
+          .order('requested_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          status: item.status,
+          requestedAt: item.requested_at,
+        }));
+      },
+
+      async create(values) {
+        await currentUserId();
+        const { data: existing, error: existingError } = await supabase
+          .from('account_deletion_requests')
+          .select('id')
+          .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
+          .eq('status', 'pending')
+          .maybeSingle();
+        if (existingError) throw toApiError(existingError, 'errors.loadFailed');
+        if (existing) {
+          throw new ApiError('PENDING_DELETION', 'You already have a pending deletion request.', 'accountDeletionRequests.pendingDeletion');
+        }
+
+        const { data, error } = await supabase
+          .from('account_deletion_requests')
+          .insert({
+            user_id: (await supabase.auth.getSession()).data.session?.user.id,
+            reason: values.reason,
+            status: 'pending',
+          })
+          .select('id, status, requested_at')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return { id: data.id, status: data.status, requestedAt: data.requested_at };
+      },
+
+      async cancel(id) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('account_deletion_requests')
+          .update({ status: 'cancelled' })
+          .eq('id', id)
+          .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
+          .eq('status', 'pending')
+          .select('id, status')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        if (!data) throw notFound('Deletion request not found or not pending.');
+        return { id: data.id, status: data.status };
+      },
+    },
+
+    admin: {
+      async stats() {
+        await currentUserId();
+        const { data: session } = await supabase.auth.getSession();
+        const { rpcError } = await supabase.rpc('is_admin');
+        if (rpcError || !session?.user) throw forbidden('Admin only.');
+
+        const [usersRes, listingsRes, reportsRes, promotionsRes, paymentsRes] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('listings').select('id, status', { count: 'exact', head: true }),
+          supabase.from('reports').select('id, status', { count: 'exact', head: true }),
+          supabase.from('promotions').select('id', { count: 'exact', head: true }),
+          supabase.from('payments').select('id', { count: 'exact', head: true }),
+        ]);
+
+        const activeListingsRes = await supabase
+          .from('listings')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active');
+        const openReportsRes = await supabase
+          .from('reports')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'open');
+
+        return {
+          users: usersRes.count || 0,
+          listings: listingsRes.count || 0,
+          activeListings: activeListingsRes.count || 0,
+          reports: reportsRes.count || 0,
+          openReports: openReportsRes.count || 0,
+          promotions: promotionsRes.count || 0,
+          payments: paymentsRes.count || 0,
+        };
+      },
+
+      async reports() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('reports')
+          .select('id, reporter_id, reason, status, details, created_at, reporter:profiles(name), target_listing_id, target_user_id')
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          reporterId: item.reporter_id,
+          reporterName: item.reporter?.name || '',
+          targetListingId: item.target_listing_id,
+          targetUserId: item.target_user_id,
+          reason: item.reason,
+          status: item.status,
+          details: item.details,
+          createdAt: item.created_at,
+        }));
+      },
+
+      async updateReport(id, values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('reports')
+          .update({
+            status: values.status,
+            reviewed_at: values.reviewedAt,
+            reviewed_by: values.reviewedBy,
+            resolution: values.resolution,
+          })
+          .eq('id', id)
+          .select('id')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return { id: data.id };
+      },
+
+      async listings() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('listings')
+          .select('id, title, seller_id, status, is_featured, views_count, contacts_count, created_at, expires_at, seller:profiles(name)')
+          .order('created_at', { ascending: false });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          title: item.title,
+          sellerId: item.seller_id,
+          sellerName: item.seller?.name || '',
+          status: item.status,
+          isFeatured: item.is_featured,
+          viewsCount: item.views_count,
+          contactsCount: item.contacts_count,
+          createdAt: item.created_at,
+          expiresAt: item.expires_at,
+        }));
+      },
+
+      async hideListing(id) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('listings')
+          .update({ status: 'hidden', closed_at: new Date().toISOString() })
+          .eq('id', id)
+          .select('id, status')
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return { id: data.id, status: data.status };
+      },
+
+      async banners() {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('banners')
+          .select('id, title, image_path, link_url, city_id, starts_at, ends_at, is_active, sort_order')
+          .order('sort_order', { ascending: true });
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          title: item.title,
+          imagePath: item.image_path,
+          linkUrl: item.link_url,
+          cityId: item.city_id,
+          startsAt: item.starts_at,
+          endsAt: item.ends_at,
+          isActive: item.is_active,
+          sortOrder: item.sort_order,
+        }));
+      },
+
+      async createBanner(values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('banners')
+          .insert({
+            title: values.title,
+            image_path: values.imagePath,
+            link_url: values.linkUrl,
+            city_id: values.cityId,
+            starts_at: values.startsAt,
+            ends_at: values.endsAt,
+            is_active: values.isActive !== false,
+            sort_order: values.sortOrder,
+          })
+          .select()
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return {
+          id: data.id,
+          title: data.title,
+          imagePath: data.image_path,
+          linkUrl: data.link_url,
+          cityId: data.city_id,
+          startsAt: data.starts_at,
+          endsAt: data.ends_at,
+          isActive: data.is_active,
+          sortOrder: data.sort_order,
+        };
+      },
+
+      async updateBanner(id, values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('banners')
+          .update({
+            title: values.title,
+            image_path: values.imagePath,
+            link_url: values.linkUrl,
+            city_id: values.cityId,
+            starts_at: values.startsAt,
+            ends_at: values.endsAt,
+            is_active: values.isActive,
+            sort_order: values.sortOrder,
+          })
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) throw toApiError(error, 'errors.saveFailed');
+        return {
+          id: data.id,
+          title: data.title,
+          imagePath: data.image_path,
+          linkUrl: data.link_url,
+          cityId: data.city_id,
+          startsAt: data.starts_at,
+          endsAt: data.ends_at,
+          isActive: data.is_active,
+          sortOrder: data.sort_order,
+        };
+      },
+
+      async deleteBanner(id) {
+        await currentUserId();
+        const { error } = await supabase.from('banners').delete().eq('id', id);
+        if (error) throw toApiError(error, 'errors.deleteFailed');
+        return { ok: true };
+      },
+    },
+
     meta: {
       async counts() {
         const { data, error } = await supabase.rpc('get_meta_counts');

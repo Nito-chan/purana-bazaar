@@ -20,6 +20,32 @@ const db = {
   reviews: [],
   savedSearches: [],
   wantedPosts: [],
+  promotions: [],
+  payments: [],
+  accountDeletionRequests: [],
+  banners: [],
+  promotionProducts: [
+    {
+      id: 'boost-7d',
+      code: 'listing_boost_7d',
+      name: '7-day listing boost',
+      kind: 'listing_boost',
+      durationDays: 7,
+      priceInr: 49,
+      isActive: true,
+      sortOrder: 1,
+    },
+    {
+      id: 'dealer-30d',
+      code: 'dealer_boost_30d',
+      name: '30-day dealer boost',
+      kind: 'dealer_boost',
+      durationDays: 30,
+      priceInr: 199,
+      isActive: true,
+      sortOrder: 2,
+    },
+  ],
 };
 
 const favouriteSets = new Map([[DEMO_USER_ID, new Set(seed.favouriteIds)]]);
@@ -1223,6 +1249,376 @@ export function createMockApi() {
           );
           if (index === -1) throw notFound('Wanted post not found.');
           db.wantedPosts.splice(index, 1);
+          return { ok: true };
+        });
+      },
+    },
+
+    promotions: {
+      list() {
+        return respond(() => {
+          const user = currentUser();
+          return db.promotions
+            .filter((item) => item.userId === user.id)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((item) => {
+              const product = db.promotionProducts.find((p) => p.id === item.productId);
+              return {
+                id: item.id,
+                userId: item.userId,
+                listingId: item.listingId,
+                productId: item.productId,
+                productName: product ? product.name : '',
+                durationDays: product ? product.durationDays : 0,
+                priceInr: product ? product.priceInr : 0,
+                paymentId: item.paymentId,
+                status: item.status,
+                startsAt: item.startsAt,
+                expiresAt: item.expiresAt,
+                createdAt: item.createdAt,
+              };
+            });
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const listing = db.listings.find((item) => item.id === values.listingId);
+          if (!listing) throw notFound('Listing not found.');
+          if (listing.sellerId !== user.id) {
+            throw new ApiError(
+              'NOT_OWNER',
+              'You can only boost your own listings.',
+              'promotions.notOwner',
+            );
+          }
+          const product = db.promotionProducts.find(
+            (item) => item.id === values.productId && item.isActive,
+          );
+          if (!product) throw notFound('Boost product not found.');
+          const existing = db.promotions.some(
+            (item) =>
+              item.listingId === values.listingId &&
+              item.status === 'active' &&
+              new Date(item.expiresAt) > new Date(),
+          );
+          if (existing) {
+            throw new ApiError(
+              'ALREADY_BOOSTED',
+              'This listing already has an active boost.',
+              'promotions.alreadyBoosted',
+            );
+          }
+
+          // Create a payment record (mock: immediately successful in demo mode).
+          const payment = {
+            id: newId(),
+            userId: user.id,
+            provider: 'razorpay',
+            providerOrderId: `mock_${newId()}`,
+            providerPaymentId: `mock_pay_${newId()}`,
+            amountInr: product.priceInr,
+            currency: 'INR',
+            status: 'paid',
+            rawPayload: { mock: true },
+            createdAt: nowIso(),
+          };
+          db.payments.push(payment);
+
+          const promotion = {
+            id: newId(),
+            userId: user.id,
+            listingId: values.listingId,
+            productId: product.id,
+            paymentId: payment.id,
+            status: 'active',
+            startsAt: nowIso(),
+            expiresAt: addDays(product.durationDays),
+            createdAt: nowIso(),
+          };
+          db.promotions.push(promotion);
+
+          // Mark the listing as featured while the boost is active.
+          listing.isFeatured = true;
+
+          return {
+            id: promotion.id,
+            listingId: promotion.listingId,
+            productId: promotion.productId,
+            paymentId: promotion.paymentId,
+            status: promotion.status,
+            startsAt: promotion.startsAt,
+            expiresAt: promotion.expiresAt,
+            createdAt: promotion.createdAt,
+          };
+        });
+      },
+    },
+
+    payments: {
+      list() {
+        return respond(() => {
+          const user = currentUser();
+          return db.payments
+            .filter((item) => item.userId === user.id)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const product = db.promotionProducts.find(
+            (item) => item.id === values.productId && item.isActive,
+          );
+          if (!product) throw notFound('Boost product not found.');
+          const payment = {
+            id: newId(),
+            userId: user.id,
+            provider: 'razorpay',
+            providerOrderId: `mock_${newId()}`,
+            providerPaymentId: null,
+            amountInr: product.priceInr,
+            currency: 'INR',
+            status: 'created',
+            rawPayload: { mock: true },
+            createdAt: nowIso(),
+          };
+          db.payments.push(payment);
+          return {
+            id: payment.id,
+            providerOrderId: payment.providerOrderId,
+            amountInr: payment.amountInr,
+            currency: payment.currency,
+            status: payment.status,
+            createdAt: payment.createdAt,
+          };
+        });
+      },
+    },
+
+    accountDeletionRequests: {
+      list() {
+        return respond(() => {
+          const user = currentUser();
+          return db.accountDeletionRequests
+            .filter((item) => item.userId === user.id)
+            .sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const existing = db.accountDeletionRequests.some(
+            (item) => item.userId === user.id && item.status === 'pending',
+          );
+          if (existing) {
+            throw new ApiError(
+              'PENDING_DELETION',
+              'You already have a pending deletion request.',
+              'accountDeletionRequests.pendingDeletion',
+            );
+          }
+          const item = {
+            id: newId(),
+            userId: user.id,
+            reason: String(values.reason ?? '').trim().slice(0, 500),
+            status: 'pending',
+            requestedAt: nowIso(),
+          };
+          db.accountDeletionRequests.push(item);
+          return { id: item.id, status: item.status, requestedAt: item.requestedAt };
+        });
+      },
+
+      cancel(id) {
+        return respond(() => {
+          const user = currentUser();
+          const item = db.accountDeletionRequests.find(
+            (item) => item.id === id && item.userId === user.id,
+          );
+          if (!item) throw notFound('Deletion request not found.');
+          if (item.status !== 'pending') {
+            throw new ApiError(
+              'CANNOT_CANCEL',
+              'Only pending requests can be cancelled.',
+              'accountDeletionRequests.cannotCancel',
+            );
+          }
+          item.status = 'cancelled';
+          return { id: item.id, status: item.status };
+        });
+      },
+    },
+
+    admin: {
+      stats() {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          return {
+            users: db.profiles.length,
+            listings: db.listings.length,
+            activeListings: db.listings.filter(
+              (item) => item.status === 'active',
+            ).length,
+            reports: db.reports.length,
+            openReports: db.reports.filter((item) => item.status === 'open').length,
+            promotions: db.promotions.length,
+            payments: db.payments.length,
+          };
+        });
+      },
+
+      reports() {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          return db.reports
+            .map((item) => {
+              const reporter = findProfile(item.reporterId);
+              return {
+                id: item.id,
+                reporterId: item.reporterId,
+                reporterName: reporter ? reporter.name : '',
+                targetListingId: item.targetListingId,
+                targetUserId: item.targetUserId,
+                reason: item.reason,
+                status: item.status,
+                details: item.details,
+                createdAt: item.createdAt,
+              };
+            })
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      },
+
+      updateReport(id, values) {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          const item = db.reports.find((item) => item.id === id);
+          if (!item) throw notFound('Report not found.');
+          if (values.status !== undefined) item.status = values.status;
+          if (values.reviewedAt !== undefined) item.reviewedAt = values.reviewedAt;
+          if (values.reviewedBy !== undefined) item.reviewedBy = values.reviewedBy;
+          if (values.resolution !== undefined) item.resolution = values.resolution;
+          return item;
+        });
+      },
+
+      listings() {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          return db.listings
+            .map((item) => {
+              const seller = findProfile(item.sellerId);
+              return {
+                id: item.id,
+                title: item.title,
+                sellerId: item.sellerId,
+                sellerName: seller ? seller.name : '',
+                status: item.status,
+                isFeatured: item.isFeatured,
+                viewsCount: item.viewsCount,
+                contactsCount: item.contactsCount,
+                createdAt: item.createdAt,
+                expiresAt: item.expiresAt,
+              };
+            })
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      },
+
+      hideListing(id) {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          const item = db.listings.find((item) => item.id === id);
+          if (!item) throw notFound('Listing not found.');
+          item.status = 'hidden';
+          item.closedAt = nowIso();
+          return { id: item.id, status: item.status };
+        });
+      },
+
+      banners() {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          return db.banners
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((item) => ({
+              id: item.id,
+              title: item.title,
+              imagePath: item.imagePath,
+              linkUrl: item.linkUrl,
+              cityId: item.cityId,
+              startsAt: item.startsAt,
+              endsAt: item.endsAt,
+              isActive: item.isActive,
+              sortOrder: item.sortOrder,
+            }));
+        });
+      },
+
+      createBanner(values) {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          const item = {
+            id: newId(),
+            title: String(values.title ?? '').trim().slice(0, 120),
+            imagePath: String(values.imagePath ?? '').trim(),
+            linkUrl: String(values.linkUrl ?? '').trim().slice(0, 300),
+            cityId: values.cityId || null,
+            startsAt: values.startsAt || null,
+            endsAt: values.endsAt || null,
+            isActive: values.isActive !== false,
+            sortOrder: Number(values.sortOrder) || 0,
+            createdAt: nowIso(),
+          };
+          if (!item.title || !item.imagePath) {
+            throw new ApiError(
+              'INVALID_BANNER',
+              'Banner title and image are required.',
+              'admin.invalidBanner',
+            );
+          }
+          db.banners.push(item);
+          return item;
+        });
+      },
+
+      updateBanner(id, values) {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          const item = db.banners.find((item) => item.id === id);
+          if (!item) throw notFound('Banner not found.');
+          if (values.title !== undefined) item.title = String(values.title).trim().slice(0, 120);
+          if (values.imagePath !== undefined) item.imagePath = String(values.imagePath).trim();
+          if (values.linkUrl !== undefined)
+            item.linkUrl = String(values.linkUrl).trim().slice(0, 300);
+          if (values.cityId !== undefined) item.cityId = values.cityId;
+          if (values.startsAt !== undefined) item.startsAt = values.startsAt;
+          if (values.endsAt !== undefined) item.endsAt = values.endsAt;
+          if (values.isActive !== undefined) item.isActive = values.isActive;
+          if (values.sortOrder !== undefined) item.sortOrder = Number(values.sortOrder) || 0;
+          return item;
+        });
+      },
+
+      deleteBanner(id) {
+        return respond(() => {
+          const user = currentUser();
+          if (!user.isAdmin) throw forbidden('Admin only.');
+          const index = db.banners.findIndex((item) => item.id === id);
+          if (index === -1) throw notFound('Banner not found.');
+          db.banners.splice(index, 1);
           return { ok: true };
         });
       },
