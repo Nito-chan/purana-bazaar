@@ -91,10 +91,14 @@ jobs:
           EOF
           ./gradlew assembleRelease
 
+      - name: Rename release APK
+        working-directory: android/app/build/outputs/apk/release
+        run: mv app-release.apk purana-bazaar-v1.0.0.apk
+
       - name: Upload Release APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: purana-bazaar-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/purana-bazaar-v1.0.0.apk
           retention-days: 30
           if-no-files-found: ignore
