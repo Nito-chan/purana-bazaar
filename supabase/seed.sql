@@ -1,0 +1,2 @@
+-- Reference data is seeded by migration 20261022064000_storage_and_reference_data.sql.
+-- This file intentionally contains no fake production listings, profiles or chats.

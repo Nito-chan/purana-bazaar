@@ -11,23 +11,24 @@ export function listingCard(listing, options = {}) {
   const image = listing.images?.[0];
   const sold = listing.status === 'sold';
 
-  const favouriteButton = showFavourite
-    ? h(
-        'button',
-        {
-          class: `fav-btn${listing.isFavourite ? ' is-active' : ''}`,
-          type: 'button',
-          'aria-label': t(listing.isFavourite ? 'listing.unsave' : 'listing.save'),
-          'aria-pressed': String(Boolean(listing.isFavourite)),
-          onClick: (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleFavourite(listing, favouriteButton, { onChange: onFavouriteChange });
+  const favouriteButton =
+    showFavourite && !listing.isMine
+      ? h(
+          'button',
+          {
+            class: `fav-btn${listing.isFavourite ? ' is-active' : ''}`,
+            type: 'button',
+            'aria-label': t(listing.isFavourite ? 'listing.unsave' : 'listing.save'),
+            'aria-pressed': String(Boolean(listing.isFavourite)),
+            onClick: (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              toggleFavourite(listing, favouriteButton, { onChange: onFavouriteChange });
+            },
           },
-        },
-        icon('heart', { size: 20 }),
-      )
-    : null;
+          icon('heart', { size: 20 }),
+        )
+      : null;
 
   const badges = [];
   if (listing.isFeatured) {

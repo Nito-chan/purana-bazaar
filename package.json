@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:real": "node scripts/build-real.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -17,7 +18,9 @@
     "test:i18n": "node scripts/check-i18n.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:real": "playwright test -c playwright.real.config.js",
     "build:check": "npm run build && node scripts/check-bundle.mjs",
+    "build:check:real": "npm run build:real && node scripts/check-bundle.mjs --mode real",
     "check": "npm run lint && npm run format:check && npm run test:i18n && npm run build:check"
   },
   "devDependencies": {
@@ -28,5 +31,8 @@
     "globals": "^17.13.0",
     "prettier": "^3.9.10",
     "vite": "^8.3.4"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0"
   }
 }

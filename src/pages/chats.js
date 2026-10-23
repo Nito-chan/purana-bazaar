@@ -1,4 +1,5 @@
 import { api } from '../api/index.js';
+import { config } from '../config.js';
 import { h } from '../lib/dom.js';
 import { formatRelativeTime, truncate } from '../lib/format.js';
 import { t } from '../i18n/index.js';
@@ -102,6 +103,6 @@ export async function render() {
           body: t('chats.emptyBody'),
           actions: [{ label: t('chats.browse'), href: '/', variant: 'primary' }],
         }),
-    h('p', { class: 'auth-note' }, t('chats.demoNote')),
+    config.useMock ? h('p', { class: 'auth-note' }, t('chats.demoNote')) : null,
   );
 }

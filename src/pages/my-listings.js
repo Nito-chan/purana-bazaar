@@ -162,6 +162,9 @@ export async function render({ query }) {
     try {
       await api.listings.renew(listing.id);
       toast.success(t('myListings.renewed'));
+      tab = 'active';
+      const basePath = window.location.pathname.replace(/\/+$/, '') || '/';
+      replaceUrl(basePath);
       await reload();
     } catch {
       toast.error(t('common.genericError'));

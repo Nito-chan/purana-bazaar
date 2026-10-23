@@ -7,6 +7,7 @@ dist-ssr
 !.env.example
 playwright-report
 test-results
+test-results-real
 blob-report
 coverage
 *.tsbuildinfo

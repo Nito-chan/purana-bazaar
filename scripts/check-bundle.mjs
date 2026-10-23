@@ -3,12 +3,26 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-const budgets = {
-  entryJs: 30 * 1024,
-  chunkJs: 25 * 1024,
-  totalJs: 100 * 1024,
-  totalCss: 20 * 1024,
-};
+const modeIndex = process.argv.indexOf('--mode');
+const mode = modeIndex === -1 ? 'mock' : process.argv[modeIndex + 1];
+const isReal = mode === 'real';
+
+// The demo excludes the Supabase client entirely. The real build adds the
+// Supabase auth, database and storage client, so its budgets are intentionally
+// separate and still tight enough to catch accidental large additions.
+const budgets = isReal
+  ? {
+      entryJs: 30 * 1024,
+      chunkJs: 75 * 1024,
+      totalJs: 160 * 1024,
+      totalCss: 20 * 1024,
+    }
+  : {
+      entryJs: 30 * 1024,
+      chunkJs: 25 * 1024,
+      totalJs: 100 * 1024,
+      totalCss: 20 * 1024,
+    };
 
 const assetsDir = fileURLToPath(new URL('../dist/assets/', import.meta.url));
 
@@ -48,7 +62,7 @@ function kb(bytes) {
   return `${(bytes / 1024).toFixed(1)} kB`;
 }
 
-console.log('Bundle assets (gzip):');
+console.log(`Bundle assets (gzip, ${isReal ? 'real' : 'mock'} build):`);
 for (const asset of [...js, ...css].sort((a, b) => b.gzip - a.gzip)) {
   console.log(`  ${asset.name.padEnd(32)} ${kb(asset.gzip)}`);
 }

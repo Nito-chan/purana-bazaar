@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 import { h } from '../lib/dom.js';
 import { applyLanguage } from '../lib/preferences.js';
 import { cityLabel, getLanguage, t } from '../i18n/index.js';
@@ -90,7 +91,9 @@ export function renderHeader(header) {
           height: 32,
         }),
         h('span', { class: 'brand__name' }, t('common.appName')),
-        h('span', { class: 'demo-pill desktop-only', 'aria-hidden': 'true' }, t('header.demo')),
+        config.useMock
+          ? h('span', { class: 'demo-pill desktop-only', 'aria-hidden': 'true' }, t('header.demo'))
+          : null,
       ),
       h(
         'nav',
@@ -197,7 +200,7 @@ export function createFooter() {
         h('p', { class: 'strong' }, t('footer.tagline')),
         h('p', { class: 'text-xs text-muted' }, t('footer.madeFor')),
       ),
-      h('p', { class: 'text-xs text-muted' }, t('footer.demo')),
+      config.useMock ? h('p', { class: 'text-xs text-muted' }, t('footer.demo')) : null,
       h(
         'p',
         { class: 'text-xs text-muted' },

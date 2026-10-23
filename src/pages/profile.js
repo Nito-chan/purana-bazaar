@@ -1,4 +1,5 @@
 import { api } from '../api/index.js';
+import { config } from '../config.js';
 import { h } from '../lib/dom.js';
 import { formatDate, formatPhone } from '../lib/format.js';
 import { cityLabel, t } from '../i18n/index.js';
@@ -197,6 +198,6 @@ export async function render() {
     ),
     stats,
     menu,
-    h('p', { class: 'auth-note' }, t('profile.demoNote')),
+    config.useMock ? h('p', { class: 'auth-note' }, t('profile.demoNote')) : null,
   );
 }

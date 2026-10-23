@@ -244,6 +244,7 @@
     "loginTitle": "Welcome back",
     "loginSubtitle": "Your listings, chats and saved things are waiting.",
     "signupTitle": "Join Purana Bazaar",
+    "signupPageTitle": "Join the bazaar",
     "signupSubtitle": "Create a free account and trade with people nearby.",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
@@ -475,8 +476,10 @@
     "resetFailed": "We couldn't send the reset link. Please try again.",
     "offline": "You're offline. Some things may not work.",
     "imageTooLarge": "That photo is too large. Choose a smaller one.",
+    "imageUpload": "We couldn't upload that photo. Please try again.",
     "tooManyPhotos": "You can add up to 5 photos.",
     "blocked": "This seller is blocked.",
+    "confirmEmail": "Check your email and confirm your account, then sign in.",
     "noSession": "Your session expired. Please sign in again."
   },
   "footer": {

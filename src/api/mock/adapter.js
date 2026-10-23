@@ -972,3 +972,5 @@ export function createMockApi() {
     },
   };
 }
+
+export const createApi = createMockApi;

@@ -77,17 +77,19 @@ export async function render({ params }) {
   const active = listing.status === 'active';
   const isMine = listing.isMine;
 
-  const favouriteButton = h(
-    'button',
-    {
-      class: `fav-btn${listing.isFavourite ? ' is-active' : ''}`,
-      type: 'button',
-      'aria-label': t(listing.isFavourite ? 'listing.unsave' : 'listing.save'),
-      'aria-pressed': String(listing.isFavourite),
-      onClick: () => toggleFavourite(listing, favouriteButton),
-    },
-    icon('heart', { size: 22 }),
-  );
+  const favouriteButton = listing.isMine
+    ? null
+    : h(
+        'button',
+        {
+          class: `fav-btn${listing.isFavourite ? ' is-active' : ''}`,
+          type: 'button',
+          'aria-label': t(listing.isFavourite ? 'listing.unsave' : 'listing.save'),
+          'aria-pressed': String(listing.isFavourite),
+          onClick: () => toggleFavourite(listing, favouriteButton),
+        },
+        icon('heart', { size: 22 }),
+      );
 
   async function shareListing() {
     const url = absoluteUrl(listingPath(listing));

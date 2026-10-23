@@ -1,4 +1,5 @@
 import { api } from '../api/index.js';
+import { config } from '../config.js';
 import { h } from '../lib/dom.js';
 import { errorMessage, t } from '../i18n/index.js';
 import { navigate } from '../lib/navigation.js';
@@ -68,7 +69,7 @@ export function render({ route, query }) {
     : isForgot
       ? t('auth.forgotSubtitle')
       : t('auth.loginSubtitle');
-  setPageTitle(title);
+  setPageTitle(isSignup ? t('auth.signupPageTitle') : title);
 
   const alertBox = h('div', { role: 'alert', 'aria-live': 'assertive' });
   const errorNodes = new Map();
@@ -362,7 +363,7 @@ export function render({ route, query }) {
           )
         : null,
       form,
-      mode === 'login'
+      mode === 'login' && config.useMock
         ? h(
             'div',
             {},
@@ -384,7 +385,7 @@ export function render({ route, query }) {
             h('p', { class: 'auth-note' }, t('auth.demoNote')),
           )
         : null,
-      isSignup ? h('p', { class: 'auth-note' }, t('auth.demoNote')) : null,
+      isSignup && config.useMock ? h('p', { class: 'auth-note' }, t('auth.demoNote')) : null,
       isForgot
         ? h('p', { class: 'auth-footer' }, h('a', { href: '/login' }, t('auth.switchLogin')))
         : null,

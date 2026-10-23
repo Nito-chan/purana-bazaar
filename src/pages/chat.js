@@ -1,4 +1,5 @@
 import { api } from '../api/index.js';
+import { config } from '../config.js';
 import { h } from '../lib/dom.js';
 import { formatDate, formatPrice, formatTime } from '../lib/format.js';
 import { t } from '../i18n/index.js';
@@ -92,6 +93,7 @@ export async function render({ params }) {
   }
 
   function appendMessage(message) {
+    messagesHost.querySelector('.chat-empty')?.remove();
     appendDayIfNeeded(message.createdAt);
     messagesHost.appendChild(messageNode(message));
   }
@@ -366,7 +368,7 @@ export async function render({ params }) {
           t('chat.safety'),
         )
       : null,
-    h('p', { class: 'chat-demo-note' }, t('chat.demoNote')),
+    config.useMock ? h('p', { class: 'chat-demo-note' }, t('chat.demoNote')) : null,
     composer,
   );
 }

@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.2.0] — 2026-10-23
+
+### Added
+
+- Supabase-backed API adapter with build-time selection between mock and real mode.
+- Real email/password auth, session restore, profile trigger, logout and password-reset request.
+- Real listing feed, detail, create/edit, photo compression and Storage upload, mark sold, renew
+  and soft delete with storage cleanup.
+- Real favourites, chats/messages, notifications, seller profiles, blocks, reports and meta counts.
+- 23-table schema with RLS, private phone storage, column-level grants, RPC write paths and RLS
+  init-plan performance hardening.
+- 32-check two-user RLS/storage smoke proof and a live-Supabase Playwright lifecycle suite at
+  375/768/1440.
+- Separate real-mode bundle budgets and a clean real database with Khargone as the only active city.
+- Real-mode UI hides all demo-only badges, notes and the demo-account button.
+
+### Fixed
+
+- Anonymous listing reads, saved-screen visibility and own-listing save buttons.
+- Renew now returns to the active tab after success.
+- Signup document title no longer repeats the app name.
+- Supabase advisor warnings for RLS helper re-evaluation.
+
+### Notes
+
+- Phase 0 mock mode remains the default demo.
+- Google OAuth, phone OTP, Turnstile, payments, realtime chat, admin MFA and push are deferred.
+
 ## [0.1.0] — 2026-10-22
 
 ### Added

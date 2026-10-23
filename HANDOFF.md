@@ -1,46 +1,45 @@
 # Purana Bazaar — project handoff
 
-**Status:** Phase 0 complete — working local prototype on mock data.
-**Phase 1:** Not started. Blocked on the decisions in section 6.
-**Last updated:** 22 October 2026
-**Legacy data:** Unrecoverable. The old Supabase host is NXDOMAIN.
+**Status:** Phase 1 backend complete. Khargone-only free-tier demo launch is next.
+**Last updated:** 23 October 2026
+**Supabase project:** `hpdeuconuprnuhidjtug` (Mumbai, `ap-south-1`)
+**Production data:** None. The real database is clean; only reference cities/categories remain.
 
-This document supersedes the earlier close-out snapshot. The project has since been rebuilt as a
-working application. It is still a demo: there is no real auth, database, image storage,
-moderation or durable data.
+The Phase 0 mock demo still works and remains the default local build. The Phase 1 Supabase
+adapter is selected at build time with `VITE_USE_MOCK=false`.
 
 ---
 
 ## 1. What works
 
-The app runs from a single `api` interface backed by an in-memory mock adapter. All routes are
-lazy-loaded and work through normal links, browser Back/Forward and direct URLs.
+### Demo mode (default)
 
-| Area           | Delivered                                                                                                                                    |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shell          | Header, city picker, language switch, notifications bell, account menu, mobile bottom nav, footer, route announcer                           |
-| Home           | Infinite feed, accessible load-more fallback, category chips, search with Hinglish synonyms, filters, sort, featured listings, results count |
-| Discovery      | City/category landing routes, query-string filters, shareable URLs, empty and error states                                                   |
-| Listing detail | Gallery, price ticket, attributes, description, seller card, related listings, share, report, favourite, mobile Call/WhatsApp/Chat bar       |
-| Sell           | Create and edit, photo previews, draft persistence, query presets, validation and focus management                                           |
-| Account        | Demo login, signup, forgot password, profile, my listings, mark sold, delete, saved items                                                    |
-| Messaging      | Conversation list, unread badges, chat detail, quick replies, send message, mark read                                                        |
-| Notifications  | List, unread state, deep links, mark all read, bell badge refresh                                                                            |
-| Other          | Seller profile, admin and wanted placeholders, 404, English/Hindi, toast, sheets, reduced motion                                             |
-
-Seed data: 9 categories, 8 cities, 7 profiles, 33 listings, 3 conversations, 6 messages,
-4 notifications and 2 favourites.
-
-### Demo account
+The app runs entirely from the in-memory mock adapter. It is the Phase 0 demo preserved for
+showing the product without touching the database.
 
 ```text
-demo@example.com
-demo1234
+Email:    demo@example.com
+Password: demo1234
 ```
 
-The login screen also has a one-click demo button. Auth, listings, favourites, chats and
-notifications are memory-only. Reloading resets them. City, language, sell draft, recently viewed
-items and dismissed banners persist in `localStorage`.
+The sign-in page also has a one-click demo button. Mock data resets on reload. City, language,
+sell draft, recently viewed items and dismissed banners persist in `localStorage`.
+
+### Real Supabase mode
+
+| Area          | Delivered                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth          | Email/password signup, login, logout, session restore, duplicate-email and invalid-login errors, password-reset request                                    |
+| Listings      | Create with compressed WebP/JPEG photo upload, edit, add/remove photos, detail, feed, similar listings, mark sold, renew, soft delete with storage cleanup |
+| Discovery     | City/category filters, price/condition filters, search, sort, cursor pagination                                                                            |
+| Account       | Profile, my listings, saved items, seller profile                                                                                                          |
+| Messaging     | Start conversation, list chats, read chat, send message, unread count, mark read                                                                           |
+| Notifications | List, unread state, mark one/all read, bell and bottom-nav badges                                                                                          |
+| Safety        | Block/unblock seller, report listing or user, masked phone until reveal, contact reveal RPC                                                                |
+| Data rules    | RLS on every public table, private phone table, protected listing columns, admin role table                                                                |
+
+Real-mode UI hides all Demo pills, demo-only notes and the demo-account button. The mock bundle
+does not include `@supabase/supabase-js`.
 
 ### Routes
 
@@ -63,103 +62,112 @@ items and dismissed banners persist in `localStorage`.
 
 ---
 
-## 2. Quality gates
+## 2. Backend and security
 
-Run from the project root:
+- Public schema: 23 tables, all with RLS enabled.
+- Private data: phone numbers live in `profile_contacts`; roles live in `user_roles`.
+- Listing writes use RPCs and column grants. Sellers cannot set `is_featured`, views, contacts or
+  expiry directly.
+- Storage bucket `listing-images`: public read, upload restricted to
+  `<auth.uid()>/<listing_id>/…`, 1 MB per file, image MIME types only.
+- RLS proof: `node scripts/phase1-smoke.mjs` checks 32 two-user and anonymous cases, including
+  cross-user writes, phone privacy, chat privacy, storage-folder isolation, block filtering,
+  favourites and soft deletion.
+- Supabase advisors: no security or performance warnings at `warn` level after the
+  `20261023090000_fix_rls_initplan.sql` migration.
+- The service-role key and database password are never in client code. `.env.local` is ignored.
+
+### Migrations
+
+All migrations in `supabase/migrations/` are applied remotely:
+
+- initial schema, RLS, RPCs, storage/reference data
+- Phase 1 hardening, anonymous relation grants, JSON boolean defaults, favourite visibility
+- RLS init-plan performance fix
+
+Database password was shared during early setup. Rotate it in the Supabase dashboard after Phase 1
+and before handing the project to anyone else. Do not put the new password in git or chat.
+
+---
+
+## 3. Quality gates
+
+Run from `purana-bazaar/`:
 
 ```bash
-npm run check      # lint, Prettier, i18n keys, production build + bundle budgets
-npm run test:e2e   # 27 Playwright tests across 375, 768 and 1440
+npm run check              # lint, Prettier, i18n, mock build + strict demo budgets
+npm run test:e2e           # 27 mock-mode Playwright tests at 375 / 768 / 1440
+npm run build:check:real   # live-adapter production build + real budgets
+npm run test:e2e:real      # live Supabase Playwright lifecycle at 375 / 768 / 1440
+node scripts/phase1-smoke.mjs  # 32 RLS / storage proof checks
 ```
 
-The E2E suite builds the app, serves it on port 4174 and verifies:
+The real-mode Playwright suite creates temporary accounts and listings. It cleans up its own
+listing and storage before finishing, but the test users remain. Do not run it against production,
+and clean test users before launch. The RLS proof script also creates two users and a listing; it
+soft-removes the listing but leaves the users.
 
-- public and signed-in routes, including direct URLs
-- clean browser console, no page errors
-- no horizontal overflow on checked pages
-- feed filtering, search, pagination
-- saving a listing
-- publishing and editing a listing with an uploaded photo
-- chat reply flow and quick replies
-- mark-all-read notifications and badge refresh
-- skip link, keyboard focus indicators
-- no serious or critical axe violations on home, login or listing detail
-
-Current bundle sizes are approximately 22 kB entry JS, 63 kB total JS and 10 kB CSS (gzip), within
-the enforced budgets.
-
-Visual QA has been completed at 375, 768 and 1440 with a dedicated Playwright browser, including
-home, listing, sell, my listings, chats, chat and notifications.
+Real-mode bundle (last measured): entry ~9.1 kB, total JS ~112 kB, CSS ~10.1 kB gzip. Mock budgets
+remain strict (30 kB entry, 25 kB per chunk, 100 kB total). Real budgets are 30 kB entry, 75 kB per
+chunk, 160 kB total.
 
 ---
 
-## 3. Constraints
+## 4. Current database state
 
-- **No backend.** Mock data is created at boot and lost on reload. Multiple tabs do not share data.
-- **No uploads.** Photos are data URLs in memory. Phase 2 will add Supabase Storage and compression.
-- **No real contact delivery.** Phone/WhatsApp actions are prototype behaviour and must not be
-  treated as a production contact path.
-- **No moderation or trust system.** Reports and blocks exist only as UI placeholders.
-- **No SEO/OG server rendering.** Titles and descriptions update client-side.
-- **No PWA, push, payments, maps or analytics.**
-- The legacy prototype in `legacy/` is reference only. Its Supabase project no longer resolves, so
-  there is no schema, data or storage to migrate.
+- 8 cities seeded; only **Khargone** is `is_active = true` and `is_launch = true`.
+- 9 categories seeded; no fake listings, profiles, chats, reports, favourites or notifications.
+- Storage objects in `listing-images`: 0.
+- Auth users: 0.
+- The real feed is empty until a real seller publishes the first listing.
+
+This is intentional: no fake production content.
 
 ---
 
-## 4. Phase tracker
+## 5. Phase tracker
 
-| Phase | Scope                                                                       | State        |
-| ----- | --------------------------------------------------------------------------- | ------------ |
-| 0     | Audit, design system, mock app, routing, all core screens, tests            | **Complete** |
-| 1     | Supabase schema, RLS, real auth, real feed and storage                      | Not started  |
-| 2     | Production sell flow, search/filters, favourites, my listings, share/OG     | Not started  |
-| 3     | Contact delivery, real chat, notifications, reports/blocks, ratings, safety | Not started  |
-| 4     | PWA, push, saved searches, wanted board, seller dashboard, referrals, SEO   | Not started  |
-| 5     | Admin, promotions, shop storefronts, ads, legal pages, account deletion     | Not started  |
-| 6     | Android app, FCM, Play Store release                                        | Not started  |
+| Phase | Scope                                                                     | State        |
+| ----- | ------------------------------------------------------------------------- | ------------ |
+| 0     | Mock app, routing, design system, all core screens, tests                 | **Complete** |
+| 1     | Supabase schema, RLS, real auth, feed, storage, chats, safety             | **Complete** |
+| 2     | Production sell/search polish, favourites, share/OG, seller dashboard     | Not started  |
+| 3     | Realtime chat, contact delivery, notifications, ratings, moderation tools | Not started  |
+| 4     | PWA, push, saved searches, wanted board, referrals, SEO                   | Not started  |
+| 5     | Admin, boosts/payments, storefronts, legal pages, account deletion        | Not started  |
+| 6     | Android app, FCM, Play Store release                                      | Not started  |
 
-Do not start Phase 2 until Phase 1 RLS proof tests pass.
-
----
-
-## 5. Phase 1 outline
-
-1. Create a new Supabase project in Mumbai (`ap-south-1`). The old project cannot be restored.
-2. Add migrations for cities, categories with attribute schemas, profiles and auth trigger,
-   listings, images, favourites, conversations, messages, reports, blocks, notifications,
-   reviews, wanted posts, saved searches, listing events, promotions and banners.
-3. Enable RLS on every table; use column-level update grants, an `is_admin()` security-definer
-   function and a `listing-images` bucket restricted to `<auth.uid()>/…` with a 1 MB limit.
-4. Seed cities and categories only. Do not seed fake production listings.
-5. Replace mock auth with Supabase auth: session restore, email confirmation, Google OAuth,
-   password reset and account deletion.
-6. Replace the listings read adapter with cursor-paginated Supabase queries and RPCs for
-   `get_feed`, `get_listing_contact` and `renew_listing`.
-7. Add RLS proof tests: users cannot edit another user's listing, promote themselves, change
-   verification/featured fields, read another user's messages or read private phone numbers.
-8. Only then move to Phase 2.
-
-The mock API surface is deliberately isolated in `src/api/index.js` so pages do not need to change
-when the adapter is swapped.
+Phase 2 must not start until the Phase 1 gate is signed off. The Phase 1 functional gate is now
+green; the remaining launch items are configuration and deployment, not schema work.
 
 ---
 
-## 6. Phase 1 gate — decisions needed
+## 6. Launch decisions and constraints
 
-1. **Supabase:** create the new Mumbai project and provide the project ref plus an access method
-   (authenticated CLI or dashboard SQL editor).
-2. **Auth:** email confirmation on or off; Google OAuth client; Cloudflare Turnstile site/secret
-   keys for local and production.
-3. **Launch cities:** confirm Khargone active only, with nearby cities seeded but inactive.
-4. **Vercel and domain:** project ownership, production domain and who controls DNS.
-5. **Moderation:** listing expiry window, report handling owner, and whether phone numbers are
-   always private until a contact action is chosen.
-6. **Monetization gate:** keep the original threshold (roughly 300–500 active listings and
-   100+ contacts per week) before charging for boosts.
+- Khargone-only demo. Nearby cities stay seeded but inactive/hidden.
+- Free tiers only: Supabase Free and Vercel Hobby. No paid plans during the demo.
+- Client pays for their own domain; no custom domain during the demo.
+- Email/password auth only. Confirmation is off for the demo. Google OAuth, phone OTP and Turnstile
+  are deferred.
+- No live Razorpay, Resend, push, Play Console app or admin MFA yet.
+- Moderation defaults: 30-day expiry with free renewal, masked phone until reveal, auto-hide after
+  3 unique reports, manual review of the first 50 paid boosts.
+- Monetisation at launch: free basic listings, ₹49/7-day boost and ₹199/30-day boost. Payments and
+  boost fulfilment are not implemented yet.
+- Expansion gate: 300 active listings and 100 contact events/week for four consecutive weeks. New
+  cities need 50–100 real listings before opening.
 
-Until these are answered, stay on the mock adapter. Do not add production credentials to source,
-config or documentation.
+### Before the first public demo
+
+1. Confirm the Supabase **Site URL** and redirect URLs for local development and the Vercel
+   production URL. Password reset sends `redirectTo = <origin>/login`; without an allow-listed
+   production URL, Supabase falls back to its configured Site URL.
+2. Create the Vercel Hobby project and set `VITE_USE_MOCK=false`, `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY` for Preview and Production.
+3. Rotate the database password; it was shared in chat during setup.
+4. Keep the demo dataset clean. Do not run the real Playwright suite or RLS proof script against
+   the production project without cleaning up test users.
+5. Seed the first real Khargone listings through the app. No fake listings or profiles.
 
 ---
 
@@ -176,7 +184,18 @@ If port 5173 is occupied:
 npm run dev -- --port 5174
 ```
 
-The default Vite preview port is 4173; Playwright uses 4174 so it can run independently.
+Real-mode dev:
 
-See [`README.md`](./README.md) for scripts, structure and checks. Historical issues from the
-legacy prototype are recorded in [`AUDIT.md`](./AUDIT.md).
+```powershell
+$env:VITE_USE_MOCK='false'; npm run dev -- --port 5174
+```
+
+```bash
+VITE_USE_MOCK=false npm run dev -- --port 5174
+```
+
+The mock Playwright preview uses port 4174; the real suite uses port 4175.
+
+See [`README.md`](./README.md) for scripts and structure. Historical issues from the legacy
+prototype are recorded in [`AUDIT.md`](./AUDIT.md). The legacy prototype is reference only; its
+Supabase host is NXDOMAIN.
