@@ -17,6 +17,7 @@ const db = {
   messages: seed.messages,
   notifications: seed.notifications,
   reports: [],
+  reviews: [],
 };
 
 const favouriteSets = new Map([[DEMO_USER_ID, new Set(seed.favouriteIds)]]);
@@ -962,6 +963,82 @@ export function createMockApi() {
           };
           db.reports.push(report);
           return { ok: true, id: report.id };
+        });
+      },
+    },
+
+    reviews: {
+      list({ listingId, sellerId }) {
+        return respond(() => {
+          if (sellerId) {
+            const seller = db.profiles.find((item) => item.id === sellerId);
+            if (!seller) throw notFound('Seller not found.');
+          }
+          let items = db.reviews;
+          if (listingId) items = items.filter((item) => item.listingId === listingId);
+          if (sellerId) items = items.filter((item) => item.sellerId === sellerId);
+          return items
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((item) => {
+              const reviewer = db.profiles.find((p) => p.id === item.reviewerId);
+              return {
+                id: item.id,
+                reviewerId: item.reviewerId,
+                reviewerName: reviewer ? reviewer.name : '',
+                listingId: item.listingId,
+                sellerId: item.sellerId,
+                rating: item.rating,
+                body: item.body,
+                createdAt: item.createdAt,
+              };
+            });
+        });
+      },
+
+      create(values) {
+        return respond(() => {
+          const user = currentUser();
+          const seller = db.profiles.find((item) => item.id === values.sellerId);
+          if (!seller) throw notFound('Seller not found.');
+          if (user.id === seller.id) {
+            throw new ApiError(
+              'NOT_YOURSELF',
+              "You can't review your own profile.",
+              'reviews.notYourself',
+            );
+          }
+          const already = db.reviews.some(
+            (item) => item.listingId === values.listingId && item.reviewerId === user.id,
+          );
+          if (already) {
+            throw new ApiError(
+              'ALREADY_REVIEWED',
+              "You've already reviewed this seller.",
+              'reviews.alreadyReviewed',
+            );
+          }
+          const rating = Number(values.rating);
+          if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            throw new ApiError(
+              'INVALID_RATING',
+              'Rating must be between 1 and 5.',
+              'reviews.invalidRating',
+            );
+          }
+          const body = String(values.body ?? '')
+            .trim()
+            .slice(0, 1000);
+          const review = {
+            id: newId(),
+            reviewerId: user.id,
+            listingId: values.listingId,
+            sellerId: values.sellerId,
+            rating,
+            body,
+            createdAt: nowIso(),
+          };
+          db.reviews.push(review);
+          return { ...review, reviewerName: user.name };
         });
       },
     },

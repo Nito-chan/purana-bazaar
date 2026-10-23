@@ -833,6 +833,57 @@ export function createSupabaseApi() {
       },
     },
 
+    reviews: {
+      async list({ listingId, sellerId }) {
+        await currentUserId();
+        let query = supabase
+          .from('reviews')
+          .select(
+            'id, reviewer_id, seller_id, listing_id, rating, body, created_at, reviewer:profiles(name)',
+          )
+          .order('created_at', { ascending: false });
+        if (listingId) query = query.eq('listing_id', listingId);
+        if (sellerId) query = query.eq('seller_id', sellerId);
+        const { data, error } = await query;
+        if (error) throw toApiError(error, 'errors.loadFailed');
+        return (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.id,
+          reviewerId: item.reviewer_id,
+          reviewerName: item.reviewer?.name || '',
+          listingId: item.listing_id,
+          sellerId: item.seller_id,
+          rating: item.rating,
+          body: item.body,
+          createdAt: item.created_at,
+        }));
+      },
+
+      async create(values) {
+        await currentUserId();
+        const { data, error } = await supabase
+          .from('reviews')
+          .insert({
+            listing_id: values.listingId,
+            seller_id: values.sellerId,
+            rating: values.rating,
+            body: values.body,
+          })
+          .select('id, reviewer_id, seller_id, listing_id, rating, body, created_at')
+          .single();
+        if (error) throw toApiError(error, 'errors.reviewFailed');
+        return {
+          id: data.id,
+          reviewerId: data.reviewer_id,
+          reviewerName: '',
+          listingId: data.listing_id,
+          sellerId: data.seller_id,
+          rating: data.rating,
+          body: data.body,
+          createdAt: data.created_at,
+        };
+      },
+    },
+
     meta: {
       async counts() {
         const { data, error } = await supabase.rpc('get_meta_counts');

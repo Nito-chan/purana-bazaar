@@ -491,7 +491,8 @@
     "tooManyPhotos": "You can add up to 5 photos.",
     "blocked": "This seller is blocked.",
     "confirmEmail": "Check your email and confirm your account, then sign in.",
-    "noSession": "Your session expired. Please sign in again."
+    "noSession": "Your session expired. Please sign in again.",
+    "reviewFailed": "Couldn't save your review. Please try again."
   },
   "footer": {
     "tagline": "Good things, second time around.",
@@ -554,5 +555,20 @@
     "warranty": "Warranty",
     "bill": "Bill",
     "accessories": "Accessories"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "writeReview": "Write a review",
+    "ratingLabel": "Your rating",
+    "reviewPlaceholder": "Share your experience…",
+    "submit": "Submit review",
+    "submitting": "Submitting…",
+    "thanks": "Thanks for your review!",
+    "noReviews": "No reviews yet",
+    "by": "by {name}",
+    "rated": "Rated {rating}",
+    "alreadyReviewed": "You've already reviewed this seller.",
+    "notYourself": "You can't review your own profile.",
+    "invalidRating": "Rating must be between 1 and 5."
   }
 }

@@ -9,6 +9,7 @@ const namespaces = [
   'sellers',
   'blocks',
   'reports',
+  'reviews',
   'meta',
 ];
 

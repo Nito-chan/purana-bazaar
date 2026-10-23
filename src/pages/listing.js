@@ -11,7 +11,7 @@ import {
 import { absoluteUrl, currentPath, listingPath, parseListingId } from '../lib/url.js';
 import { conditionLabel, categoryLabel, cityLabel, t } from '../i18n/index.js';
 import { displayAttributeEntries } from '../lib/category-attributes.js';
-import { isSignedIn, loginPath } from '../lib/auth.js';
+import { isSignedIn, loginPath, currentUser } from '../lib/auth.js';
 import { navigate } from '../lib/navigation.js';
 import { setPageTitle, setPageDescription } from '../lib/seo.js';
 import { addRecentlyViewed } from '../lib/storage.js';
@@ -22,6 +22,7 @@ import { gallery } from '../ui/gallery.js';
 import { icon } from '../ui/icons.js';
 import { listingGrid } from '../ui/listing-card.js';
 import { openReportSheet } from '../ui/report-sheet.js';
+import { reviewForm, reviewNode } from '../ui/reviews.js';
 import { toast } from '../ui/toast.js';
 
 function withBusy(button, work) {
@@ -67,9 +68,10 @@ export async function render({ params }) {
   addRecentlyViewed(id);
 
   const language = document.documentElement.lang === 'hi' ? 'hi' : 'en';
-  const [similar, sellerInfo] = await Promise.all([
+  const [similar, sellerInfo, reviews] = await Promise.all([
     api.listings.similar(id, { limit: 4 }).catch(() => []),
     api.sellers.get(listing.sellerId).catch(() => null),
+    api.reviews.list({ listingId: id }).catch(() => []),
   ]);
 
   setPageTitle(listing.title);
@@ -77,6 +79,40 @@ export async function render({ params }) {
 
   const active = listing.status === 'active';
   const isMine = listing.isMine;
+
+  let reviewsHost = null;
+  let reviewFormEl = null;
+  let reviewError = '';
+  let reviewSubmitting = false;
+  const user = currentUser();
+  const alreadyReviewed = Boolean(user) && reviews.some((r) => r.reviewerId === user.id);
+  const canReview = Boolean(user) && !isMine && !alreadyReviewed;
+
+  async function submitReview(values) {
+    reviewSubmitting = true;
+    reviewError = '';
+    try {
+      const created = await api.reviews.create({
+        listingId: id,
+        sellerId: listing.sellerId,
+        rating: values.rating,
+        body: values.body,
+      });
+      reviews.unshift(created);
+      if (reviewsHost) {
+        reviewsHost.prepend(reviewNode(created, language));
+      }
+      reviewError = '';
+      reviewFormEl?.remove();
+      reviewFormEl = null;
+      toast.success(t('reviews.thanks'));
+    } catch (error) {
+      reviewError =
+        (error && error.messageKey ? t(error.messageKey) : null) || t('errors.reviewFailed');
+    } finally {
+      reviewSubmitting = false;
+    }
+  }
 
   const favouriteButton = listing.isMine
     ? null
@@ -409,6 +445,32 @@ export async function render({ params }) {
               )
             : null,
           sellerCard,
+          canReview || reviews.length
+            ? h(
+                'section',
+                { class: 'detail-section', style: { marginTop: '20px' } },
+                h('h2', { class: 'detail-section-title' }, t('reviews.title')),
+                (() => {
+                  const host = h('div', { class: 'review-list' });
+                  if (reviews.length) {
+                    host.replaceChildren(...reviews.map((r) => reviewNode(r, language)));
+                  }
+                  reviewsHost = host;
+                  return host;
+                })(),
+                canReview
+                  ? (reviewFormEl = reviewForm({
+                      listingId: id,
+                      sellerId: listing.sellerId,
+                      onSubmit: submitReview,
+                      rating: 0,
+                      body: '',
+                      error: reviewError,
+                      submitting: reviewSubmitting,
+                    }))
+                  : null,
+              )
+            : null,
           h(
             'div',
             { class: 'detail-safety' },
