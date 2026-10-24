@@ -465,6 +465,7 @@
     "resolveReportTitle": "रिपोर्ट हल करें?",
     "resolveReportBody": "इस रिपोर्ट को {status} के रूप में चिह्नित करें।",
     "reportUpdated": "रिपोर्ट अपडेट हुई।",
+    "listingsSection": "लिस्टिंग",
     "listingsTitle": "शीर्षक",
     "listingsSubtitle": "सक्रिय और छिपी हुई लिस्टिंग को मॉडरेट करें।",
     "noListings": "कोई लिस्टिंग नहीं",

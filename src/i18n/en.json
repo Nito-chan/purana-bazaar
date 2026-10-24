@@ -465,6 +465,7 @@
     "resolveReportTitle": "Resolve report?",
     "resolveReportBody": "Mark this report as {status}.",
     "reportUpdated": "Report updated.",
+    "listingsSection": "Listings",
     "listingsTitle": "Title",
     "listingsSubtitle": "Moderate active and hidden listings.",
     "noListings": "No listings",

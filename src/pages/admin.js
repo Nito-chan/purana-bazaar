@@ -92,7 +92,7 @@ export async function render() {
         'aria-label': label,
         tabindex: '0',
       },
-      h('table', { class: 'admin-table' }, h('thead', headRow), h('tbody', ...rows)),
+      h('table', { class: 'admin-table' }, h('thead', {}, headRow), h('tbody', {}, ...rows)),
     );
   }
 
@@ -136,10 +136,11 @@ export async function render() {
           t('admin.reportsTitle'),
           h(
             'tr',
-            h('th', t('admin.reportsReporter')),
-            h('th', t('admin.reportsReason')),
-            h('th', t('admin.reportsStatus')),
-            h('th', t('admin.reportsActions')),
+            {},
+            h('th', {}, t('admin.reportsReporter')),
+            h('th', {}, t('admin.reportsReason')),
+            h('th', {}, t('admin.reportsStatus')),
+            h('th', {}, t('admin.reportsActions')),
           ),
           reports.map((report) => {
             const isOpen = report.status === 'open';
@@ -221,20 +222,21 @@ export async function render() {
     h(
       'div',
       { class: 'admin-section__head' },
-      h('h2', { class: 'admin-section__title' }, t('admin.listingsTitle')),
+      h('h2', { class: 'admin-section__title' }, t('admin.listingsSection')),
       h('p', { class: 'text-muted' }, t('admin.listingsSubtitle')),
     ),
     listings.length
       ? tableRegion(
-          t('admin.listingsTitle'),
+          t('admin.listingsSection'),
           h(
             'tr',
-            h('th', t('admin.listingsTitle')),
-            h('th', t('admin.listingsSeller')),
-            h('th', t('admin.listingsStatus')),
-            h('th', t('admin.listingsViews')),
-            h('th', t('admin.listingsContacts')),
-            h('th', t('admin.listingsActions')),
+            {},
+            h('th', {}, t('admin.listingsTitle')),
+            h('th', {}, t('admin.listingsSeller')),
+            h('th', {}, t('admin.listingsStatus')),
+            h('th', {}, t('admin.listingsViews')),
+            h('th', {}, t('admin.listingsContacts')),
+            h('th', {}, t('admin.listingsActions')),
           ),
           listings.map((listing) => {
             const isActive = listing.status === 'active';
@@ -325,9 +327,10 @@ export async function render() {
           t('admin.bannersTitle'),
           h(
             'tr',
-            h('th', t('admin.bannersTitle')),
-            h('th', t('admin.bannersStatus')),
-            h('th', t('admin.bannersActions')),
+            {},
+            h('th', {}, t('admin.bannersTitle')),
+            h('th', {}, t('admin.bannersStatus')),
+            h('th', {}, t('admin.bannersActions')),
           ),
           banners.map((banner) =>
             h(
