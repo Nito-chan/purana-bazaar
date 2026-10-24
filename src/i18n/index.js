@@ -2,7 +2,10 @@ let enDict = null;
 let hiDict = null;
 
 function loadDict(lang) {
-  const promise = import(`./${lang}.json`).then((m) => m.default);
+  const promise =
+    lang === 'hi'
+      ? import('./hi.json').then((m) => m.default)
+      : import('./en.json').then((m) => m.default);
   if (lang === 'en') {
     promise.then((d) => {
       enDict = d;
@@ -17,8 +20,14 @@ function loadDict(lang) {
 
 // Start loading both dictionaries immediately. They are fetched in a
 // separate chunk so the entry bundle stays small.
-loadDict('en');
-loadDict('hi');
+const englishReady = loadDict('en');
+const hindiReady = loadDict('hi');
+
+/**
+ * Resolves once every dictionary is available. Boot awaits this so the first
+ * paint never shows raw translation keys such as `common.loading`.
+ */
+export const i18nReady = Promise.all([englishReady, hindiReady]);
 
 function resolve(dictionary, key) {
   const parts = String(key ?? '').split('.');

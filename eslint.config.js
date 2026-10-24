@@ -3,7 +3,17 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['dist/**', 'legacy/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'],
+    ignores: [
+      'dist/**',
+      'legacy/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+      'android/app/src/main/assets/**',
+      'android/app/build/**',
+      'android/.gradle/**',
+      '.playwright-mcp/**',
+    ],
   },
   js.configs.recommended,
   {

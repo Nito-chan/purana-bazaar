@@ -5,7 +5,7 @@ import './styles/pages.css';
 
 import { api } from './api/index.js';
 import { h } from './lib/dom.js';
-import { setLanguage, t } from './i18n/index.js';
+import { i18nReady, setLanguage, t } from './i18n/index.js';
 import { syncSession } from './lib/session.js';
 import { store } from './store.js';
 import { startRouter } from './router.js';
@@ -40,15 +40,17 @@ async function boot() {
   const state = store.getState();
   setLanguage(state.language);
 
-  app.replaceChildren(
-    h(
-      'div',
-      { class: 'container page', role: 'status' },
-      h('p', { class: 'text-muted' }, t('common.loading')),
-    ),
-  );
-
   try {
+    await i18nReady;
+
+    app.replaceChildren(
+      h(
+        'div',
+        { class: 'container page', role: 'status' },
+        h('p', { class: 'text-muted' }, t('common.loading')),
+      ),
+    );
+
     const [categories, cities] = await Promise.all([
       api.categories.list(),
       api.cities.list(),
