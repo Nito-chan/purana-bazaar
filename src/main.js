@@ -7,6 +7,7 @@ import { api } from './api/index.js';
 import { h } from './lib/dom.js';
 import { i18nReady, setLanguage, t } from './i18n/index.js';
 import { syncSession } from './lib/session.js';
+import { initNativeBackButton } from './lib/native.js';
 import { store } from './store.js';
 import { startRouter } from './router.js';
 import { createShell } from './ui/shell.js';
@@ -61,6 +62,9 @@ async function boot() {
     const shell = createShell();
     app.replaceChildren(shell.element);
     startRouter({ root: shell.view, announcerElement: shell.announcer });
+    initNativeBackButton().catch((error) => {
+      console.warn('Native back handling unavailable', error);
+    });
 
     window.addEventListener('offline', () => {
       store.setState({ online: false });

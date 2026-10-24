@@ -201,12 +201,26 @@ export function navigate(path, options = {}) {
     return;
   }
 
+  const currentDepth = Number(window.history.state?.pbDepth) || 0;
   window.history[options.replace ? 'replaceState' : 'pushState'](
-    { ...(window.history.state || {}), pb: true },
+    {
+      ...(window.history.state || {}),
+      pb: true,
+      pbDepth: options.replace ? currentDepth : currentDepth + 1,
+    },
     '',
     target,
   );
   renderRoute();
+}
+
+/**
+ * True when the current history entry was reached through in-app navigation.
+ * Native back handling uses this to decide between SPA history and a safe
+ * fallback route instead of leaving the app.
+ */
+export function canGoBackInApp() {
+  return (Number(window.history.state?.pbDepth) || 0) > 0;
 }
 
 export function refresh() {
@@ -216,6 +230,14 @@ export function refresh() {
 export function startRouter({ root, announcerElement }) {
   viewRoot = root;
   announcer = announcerElement;
+
+  if (window.history.state?.pb !== true) {
+    window.history.replaceState(
+      { ...(window.history.state || {}), pb: true, pbDepth: 0 },
+      '',
+      window.location.href,
+    );
+  }
 
   setNavigationHandler(navigate);
   setRefreshHandler(refresh);
