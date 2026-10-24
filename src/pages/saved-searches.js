@@ -1,16 +1,21 @@
 import { api } from '../api/index.js';
 import { h } from '../lib/dom.js';
-import { addQuery, currentPath } from '../lib/url.js';
+import { buildQuery, currentPath } from '../lib/url.js';
+import { formatPrice } from '../lib/format.js';
 import { navigate } from '../lib/navigation.js';
 import { setPageTitle } from '../lib/seo.js';
 import { setCityPreference, store } from '../store.js';
-import { categoryLabel, cityLabel, t } from '../i18n/index.js';
+import { categoryLabel, cityLabel, conditionLabel, t } from '../i18n/index.js';
 import { authRequiredState, errorState } from '../ui/auth-gate.js';
 import { emptyState } from '../ui/empty.js';
 import { confirmSheet } from '../ui/confirm-sheet.js';
 import { openSheet } from '../ui/sheet.js';
 import { icon } from '../ui/icons.js';
 import { toast } from '../ui/toast.js';
+
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== '';
+}
 
 function queryLabel(query, categoriesById, citiesById) {
   const parts = [];
@@ -23,13 +28,13 @@ function queryLabel(query, categoriesById, citiesById) {
     const city = citiesById.get(query.cityId);
     parts.push(city ? cityLabel(city) : query.cityId);
   }
-  if (query.min !== null || query.max !== null) {
-    const min = query.min !== null ? `₹${query.min}` : '';
-    const max = query.max !== null ? `₹${query.max}` : '';
+  if (hasValue(query.min) || hasValue(query.max)) {
+    const min = hasValue(query.min) ? formatPrice(query.min) : '';
+    const max = hasValue(query.max) ? formatPrice(query.max) : '';
     parts.push(`${min} – ${max}`);
   }
-  if (query.condition) parts.push(query.condition);
-  return parts.length ? parts.join(' · ') : t('savedSearches.emptyBody');
+  if (query.condition) parts.push(conditionLabel(query.condition));
+  return parts.length ? parts.join(' · ') : t('savedSearches.allListings');
 }
 
 export async function render() {
@@ -66,7 +71,7 @@ export async function render() {
     );
   }
 
-  const mine = searches.filter((item) => item.userId === userId);
+  let mine = searches.filter((item) => item.userId === userId);
 
   async function removeSearch(item) {
     const confirmed = await confirmSheet({
@@ -173,32 +178,33 @@ export async function render() {
   function applySearch(item) {
     const query = item.query || {};
     const nextCityId = query.cityId || null;
-    if (nextCityId && nextCityId !== state.cityId) {
+    if (nextCityId !== store.getState().cityId) {
       setCityPreference(nextCityId);
     }
     const params = {};
     if (query.q) params.q = query.q;
     if (query.category) params.category = query.category;
-    if (query.min !== null) params.min = String(query.min);
-    if (query.max !== null) params.max = String(query.max);
+    if (hasValue(query.min)) params.min = String(query.min);
+    if (hasValue(query.max)) params.max = String(query.max);
     if (query.condition) params.condition = query.condition;
     if (query.photos) params.photos = '1';
     if (query.sort) params.sort = query.sort;
-    navigate(addQuery(currentPath().split('?')[0] || '/', params));
+    navigate(`/${buildQuery(params)}`);
   }
 
   async function reload() {
     try {
       searches = await api.savedSearches.list();
+      mine = searches.filter((item) => item.userId === userId);
       renderList();
     } catch {
       toast.error(t('common.genericError'));
     }
   }
 
+  const listHost = h('div', { id: 'saved-searches-list' });
+
   function renderList() {
-    const listHost = document.getElementById('saved-searches-list');
-    if (!listHost) return;
     listHost.replaceChildren();
     if (!mine.length) {
       listHost.appendChild(
@@ -206,7 +212,7 @@ export async function render() {
           iconName: 'save',
           title: t('savedSearches.emptyTitle'),
           body: t('savedSearches.emptyBody'),
-          actions: [{ label: t('home.emptyAction'), href: '/sell', variant: 'primary' }],
+          actions: [{ label: t('savedSearches.emptyAction'), href: '/', variant: 'primary' }],
         }),
       );
       return;
@@ -246,7 +252,7 @@ export async function render() {
                 class: `btn btn--${isNotifying ? 'secondary' : 'outline'} btn--sm`,
                 type: 'button',
                 'aria-pressed': String(isNotifying),
-                'aria-label': isNotifying ? 'Notifications on' : 'Notifications off',
+                'aria-label': t(isNotifying ? 'savedSearches.notifyOn' : 'savedSearches.notifyOff'),
                 onClick: () => toggleNotify(item),
               },
               icon('bell', { size: 16 }),
@@ -292,6 +298,6 @@ export async function render() {
         h('p', { class: 'text-muted' }, t('savedSearches.subtitle')),
       ),
     ),
-    h('div', { style: { marginTop: '20px' } }, h('div', { id: 'saved-searches-list' })),
+    h('div', { style: { marginTop: '20px' } }, listHost),
   );
 }

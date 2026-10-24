@@ -38,7 +38,7 @@ export async function render() {
     );
   }
 
-  const pending = requests.find((item) => item.status === 'pending');
+  let pending = requests.find((item) => item.status === 'pending');
 
   async function createRequest() {
     const reasonInput = h('textarea', {
@@ -137,15 +137,16 @@ export async function render() {
   async function refreshData() {
     try {
       requests = await api.accountDeletionRequests.list();
+      pending = requests.find((item) => item.status === 'pending');
       renderList();
     } catch {
       toast.error(t('common.genericError'));
     }
   }
 
+  const listHost = h('div', { id: 'account-delete-list' });
+
   function renderList() {
-    const listHost = document.getElementById('account-delete-list');
-    if (!listHost) return;
     listHost.replaceChildren();
 
     if (pending) {
@@ -216,6 +217,6 @@ export async function render() {
         h('p', { class: 'text-muted' }, t('accountDelete.subtitle')),
       ),
     ),
-    h('div', { style: { marginTop: '20px' } }, h('div', { id: 'account-delete-list' })),
+    h('div', { style: { marginTop: '20px' } }, listHost),
   );
 }

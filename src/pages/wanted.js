@@ -40,7 +40,7 @@ export async function render() {
     );
   }
 
-  const openPosts = posts.filter((post) => post.status === 'open');
+  let openPosts = posts.filter((post) => post.status === 'open');
 
   function cityName(cityId) {
     const city = cityId ? citiesById.get(cityId) : null;
@@ -347,15 +347,16 @@ export async function render() {
   async function reload() {
     try {
       posts = await api.wantedPosts.list();
+      openPosts = posts.filter((post) => post.status === 'open');
       renderList();
     } catch {
       toast.error(t('common.genericError'));
     }
   }
 
+  const listHost = h('div', { id: 'wanted-list' });
+
   function renderList() {
-    const listHost = document.getElementById('wanted-list');
-    if (!listHost) return;
     listHost.replaceChildren();
     if (!openPosts.length) {
       listHost.appendChild(
@@ -379,10 +380,12 @@ export async function render() {
     listHost.replaceChildren(...openPosts.map(postCard));
   }
 
+  renderList();
+
   const createButton = signedIn
     ? h(
-        'a',
-        { class: 'btn btn--primary', href: '/wanted', onClick: () => openForm() },
+        'button',
+        { class: 'btn btn--primary', type: 'button', onClick: () => openForm() },
         icon('plus', { size: 18 }),
         t('wantedPosts.create'),
       )
@@ -402,6 +405,6 @@ export async function render() {
       ),
       createButton,
     ),
-    h('div', { style: { marginTop: '20px' } }, h('div', { id: 'wanted-list' }, renderList())),
+    h('div', { style: { marginTop: '20px' } }, listHost),
   );
 }

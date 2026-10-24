@@ -654,7 +654,11 @@
     "created": "Search saved",
     "updated": "Search updated",
     "notify": "Notify me of new matches",
-    "create": "Save search"
+    "create": "Save search",
+    "emptyAction": "Browse listings",
+    "allListings": "All listings",
+    "notifyOn": "Notifications on",
+    "notifyOff": "Notifications off"
   },
   "wantedPosts": {
     "title": "Wanted board",
