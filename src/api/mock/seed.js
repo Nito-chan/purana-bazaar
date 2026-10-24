@@ -195,7 +195,7 @@ const PROFILE_ROWS = [
     rating: 4.9,
     ratingCount: 3,
     memberSince: '2025-01-01T00:00:00.000Z',
-    bio: 'This is the demo account for the Phase 0 prototype.',
+    bio: 'Here to explore Purana Bazaar. Try saving an item or starting a chat.',
     isAdmin: false,
   },
 ];

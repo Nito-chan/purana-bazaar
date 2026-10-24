@@ -1,29 +1,73 @@
 import { api } from '../api/index.js';
 import { h } from '../lib/dom.js';
 import { t } from '../i18n/index.js';
-import { navigate } from '../lib/navigation.js';
+import { currentUser, isSignedIn } from '../lib/auth.js';
+import { refresh } from '../lib/navigation.js';
 import { setPageTitle } from '../lib/seo.js';
-import { errorState } from '../ui/auth-gate.js';
+import { authRequiredState, errorState } from '../ui/auth-gate.js';
 import { emptyState } from '../ui/empty.js';
 import { confirmSheet } from '../ui/confirm-sheet.js';
 import { openSheet } from '../ui/sheet.js';
 import { icon } from '../ui/icons.js';
 import { toast } from '../ui/toast.js';
 
+function adminPage(body) {
+  return h(
+    'div',
+    { class: 'container page' },
+    h(
+      'div',
+      { class: 'page-head' },
+      h(
+        'div',
+        {},
+        h('h1', { class: 'page-title' }, t('admin.title')),
+        h('p', { class: 'text-muted' }, t('admin.subtitle')),
+      ),
+    ),
+    body,
+  );
+}
+
 export async function render() {
   document.body.dataset.page = 'admin';
   setPageTitle(t('admin.title'));
+
+  const user = isSignedIn() ? currentUser() : null;
+  if (!user) {
+    return adminPage(
+      h(
+        'div',
+        { class: 'admin-gate' },
+        authRequiredState({
+          title: t('admin.signInTitle'),
+          body: t('admin.signInBody'),
+          next: '/admin',
+        }),
+      ),
+    );
+  }
+
+  if (!user.isAdmin) {
+    return adminPage(
+      h(
+        'div',
+        { class: 'admin-gate' },
+        emptyState({
+          iconName: 'lock',
+          title: t('admin.notAllowed'),
+          body: t('admin.notAllowedBody'),
+          actions: [{ label: t('notFound.home'), href: '/', variant: 'primary' }],
+        }),
+      ),
+    );
+  }
 
   let stats;
   try {
     stats = await api.admin.stats();
   } catch {
-    return h(
-      'div',
-      { class: 'container page' },
-      h('h1', { class: 'page-title' }, t('admin.title')),
-      h('div', { style: { marginTop: '16px' } }, errorState({ onRetry: () => navigate('/admin') })),
-    );
+    return adminPage(h('div', { class: 'admin-gate' }, errorState({ onRetry: refresh })));
   }
 
   let reports = [];
@@ -37,6 +81,19 @@ export async function render() {
     ]);
   } catch {
     toast.error(t('common.genericError'));
+  }
+
+  function tableRegion(label, headRow, rows) {
+    return h(
+      'div',
+      {
+        class: 'admin-table-wrap',
+        role: 'region',
+        'aria-label': label,
+        tabindex: '0',
+      },
+      h('table', { class: 'admin-table' }, h('thead', headRow), h('tbody', ...rows)),
+    );
   }
 
   function statCard(label, value, iconName, tone) {
@@ -67,7 +124,7 @@ export async function render() {
   // Reports moderation
   const reportsSection = h(
     'section',
-    { class: 'admin-section', style: { marginTop: '28px' } },
+    { class: 'admin-section' },
     h(
       'div',
       { class: 'admin-section__head' },
@@ -75,70 +132,63 @@ export async function render() {
       h('p', { class: 'text-muted' }, t('admin.reportsSubtitle')),
     ),
     reports.length
-      ? h(
-          'table',
-          { class: 'admin-table' },
+      ? tableRegion(
+          t('admin.reportsTitle'),
           h(
-            'thead',
-            h(
+            'tr',
+            h('th', t('admin.reportsReporter')),
+            h('th', t('admin.reportsReason')),
+            h('th', t('admin.reportsStatus')),
+            h('th', t('admin.reportsActions')),
+          ),
+          reports.map((report) => {
+            const isOpen = report.status === 'open';
+            return h(
               'tr',
-              h('th', t('admin.reportsReporter')),
-              h('th', t('admin.reportsReason')),
-              h('th', t('admin.reportsStatus')),
-              h('th', t('admin.reportsActions')),
-            ),
-          ),
-          h(
-            'tbody',
-            ...reports.map((report) => {
-              const isOpen = report.status === 'open';
-              return h(
-                'tr',
-                { class: 'admin-table__row' },
-                h('td', { class: 'admin-table__cell' }, report.reporterName || '—'),
-                h('td', { class: 'admin-table__cell' }, report.reason),
+              { class: 'admin-table__row' },
+              h('td', { class: 'admin-table__cell' }, report.reporterName || '—'),
+              h('td', { class: 'admin-table__cell' }, report.reason),
+              h(
+                'td',
+                { class: 'admin-table__cell' },
                 h(
-                  'td',
-                  { class: 'admin-table__cell' },
-                  h(
-                    'span',
-                    { class: `badge ${isOpen ? 'badge--warning' : 'badge--success'}` },
-                    report.status,
-                  ),
+                  'span',
+                  { class: `badge ${isOpen ? 'badge--warning' : 'badge--success'}` },
+                  report.status,
                 ),
+              ),
+              h(
+                'td',
+                { class: 'admin-table__cell' },
                 h(
-                  'td',
-                  { class: 'admin-table__cell' },
-                  h(
-                    'div',
-                    { class: 'admin-actions' },
-                    isOpen
-                      ? h(
-                          'button',
-                          {
-                            class: 'btn btn--primary btn--sm',
-                            type: 'button',
-                            onClick: () => resolveReport(report, 'resolved'),
-                          },
-                          t('admin.resolve'),
-                        )
-                      : null,
-                    isOpen
-                      ? h(
-                          'button',
-                          {
-                            class: 'btn btn--secondary btn--sm',
-                            type: 'button',
-                            onClick: () => resolveReport(report, 'dismissed'),
-                          },
-                          t('admin.dismiss'),
-                        )
-                      : null,
-                  ),
+                  'div',
+                  { class: 'admin-actions' },
+                  isOpen
+                    ? h(
+                        'button',
+                        {
+                          class: 'btn btn--primary btn--sm',
+                          type: 'button',
+                          onClick: () => resolveReport(report, 'resolved'),
+                        },
+                        t('admin.resolve'),
+                      )
+                    : null,
+                  isOpen
+                    ? h(
+                        'button',
+                        {
+                          class: 'btn btn--secondary btn--sm',
+                          type: 'button',
+                          onClick: () => resolveReport(report, 'dismissed'),
+                        },
+                        t('admin.dismiss'),
+                      )
+                    : null,
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         )
       : emptyState({
           iconName: 'inbox',
@@ -158,7 +208,7 @@ export async function render() {
     try {
       await api.admin.updateReport(report.id, { status });
       toast.success(t('admin.reportUpdated'));
-      await refreshData();
+      refresh();
     } catch {
       toast.error(t('common.genericError'));
     }
@@ -167,7 +217,7 @@ export async function render() {
   // Listings moderation
   const listingsSection = h(
     'section',
-    { class: 'admin-section', style: { marginTop: '28px' } },
+    { class: 'admin-section' },
     h(
       'div',
       { class: 'admin-section__head' },
@@ -175,63 +225,56 @@ export async function render() {
       h('p', { class: 'text-muted' }, t('admin.listingsSubtitle')),
     ),
     listings.length
-      ? h(
-          'table',
-          { class: 'admin-table' },
+      ? tableRegion(
+          t('admin.listingsTitle'),
           h(
-            'thead',
-            h(
+            'tr',
+            h('th', t('admin.listingsTitle')),
+            h('th', t('admin.listingsSeller')),
+            h('th', t('admin.listingsStatus')),
+            h('th', t('admin.listingsViews')),
+            h('th', t('admin.listingsContacts')),
+            h('th', t('admin.listingsActions')),
+          ),
+          listings.map((listing) => {
+            const isActive = listing.status === 'active';
+            return h(
               'tr',
-              h('th', t('admin.listingsTitle')),
-              h('th', t('admin.listingsSeller')),
-              h('th', t('admin.listingsStatus')),
-              h('th', t('admin.listingsViews')),
-              h('th', t('admin.listingsContacts')),
-              h('th', t('admin.listingsActions')),
-            ),
-          ),
-          h(
-            'tbody',
-            ...listings.map((listing) => {
-              const isActive = listing.status === 'active';
-              return h(
-                'tr',
-                { class: 'admin-table__row' },
-                h('td', { class: 'admin-table__cell' }, listing.title),
-                h('td', { class: 'admin-table__cell' }, listing.sellerName || '—'),
+              { class: 'admin-table__row' },
+              h('td', { class: 'admin-table__cell' }, listing.title),
+              h('td', { class: 'admin-table__cell' }, listing.sellerName || '—'),
+              h(
+                'td',
+                { class: 'admin-table__cell' },
                 h(
-                  'td',
-                  { class: 'admin-table__cell' },
-                  h(
-                    'span',
-                    { class: `badge ${isActive ? 'badge--success' : 'badge--neutral'}` },
-                    listing.status,
-                  ),
+                  'span',
+                  { class: `badge ${isActive ? 'badge--success' : 'badge--neutral'}` },
+                  listing.status,
                 ),
-                h('td', { class: 'admin-table__cell' }, String(listing.viewsCount)),
-                h('td', { class: 'admin-table__cell' }, String(listing.contactsCount)),
+              ),
+              h('td', { class: 'admin-table__cell' }, String(listing.viewsCount)),
+              h('td', { class: 'admin-table__cell' }, String(listing.contactsCount)),
+              h(
+                'td',
+                { class: 'admin-table__cell' },
                 h(
-                  'td',
-                  { class: 'admin-table__cell' },
-                  h(
-                    'div',
-                    { class: 'admin-actions' },
-                    isActive
-                      ? h(
-                          'button',
-                          {
-                            class: 'btn btn--danger btn--sm',
-                            type: 'button',
-                            onClick: () => hideListing(listing),
-                          },
-                          t('admin.hideListing'),
-                        )
-                      : null,
-                  ),
+                  'div',
+                  { class: 'admin-actions' },
+                  isActive
+                    ? h(
+                        'button',
+                        {
+                          class: 'btn btn--danger btn--sm',
+                          type: 'button',
+                          onClick: () => hideListing(listing),
+                        },
+                        t('admin.hideListing'),
+                      )
+                    : null,
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         )
       : emptyState({
           iconName: 'tag',
@@ -251,7 +294,7 @@ export async function render() {
     try {
       await api.admin.hideListing(listing.id);
       toast.success(t('admin.listingHidden'));
-      await refreshData();
+      refresh();
     } catch {
       toast.error(t('common.genericError'));
     }
@@ -260,7 +303,7 @@ export async function render() {
   // Banners management
   const bannersSection = h(
     'section',
-    { class: 'admin-section', style: { marginTop: '28px' } },
+    { class: 'admin-section' },
     h(
       'div',
       { class: 'admin-section__head' },
@@ -278,21 +321,16 @@ export async function render() {
       ),
     ),
     banners.length
-      ? h(
-          'table',
-          { class: 'admin-table' },
+      ? tableRegion(
+          t('admin.bannersTitle'),
           h(
-            'thead',
-            h(
-              'tr',
-              h('th', t('admin.bannersTitle')),
-              h('th', t('admin.bannersStatus')),
-              h('th', t('admin.bannersActions')),
-            ),
+            'tr',
+            h('th', t('admin.bannersTitle')),
+            h('th', t('admin.bannersStatus')),
+            h('th', t('admin.bannersActions')),
           ),
-          h(
-            'tbody',
-            ...banners.map((banner) => h(
+          banners.map((banner) =>
+            h(
               'tr',
               { class: 'admin-table__row' },
               h('td', { class: 'admin-table__cell' }, banner.title),
@@ -332,7 +370,7 @@ export async function render() {
                   ),
                 ),
               ),
-            )),
+            ),
           ),
         )
       : h(
@@ -403,9 +441,13 @@ export async function render() {
         onSubmit: async (event) => {
           event.preventDefault();
           errorBox.replaceChildren();
-          const title = String(titleInput.value ?? '').trim().slice(0, 120);
+          const title = String(titleInput.value ?? '')
+            .trim()
+            .slice(0, 120);
           const imagePath = String(imageInput.value ?? '').trim();
-          const linkUrl = String(linkInput.value ?? '').trim().slice(0, 300);
+          const linkUrl = String(linkInput.value ?? '')
+            .trim()
+            .slice(0, 300);
           const isActive = isActiveInput.checked;
           const sortOrder = Number(sortOrderInput.value) || 0;
           let submitButton;
@@ -450,7 +492,7 @@ export async function render() {
               toast.success(t('admin.bannerCreated'));
             }
             handle.close();
-            await refreshData();
+            refresh();
           } catch {
             toast.error(t('common.genericError'));
           } finally {
@@ -468,11 +510,7 @@ export async function render() {
       h(
         'div',
         { class: 'field' },
-        h(
-          'label',
-          { class: 'field__label', for: 'banner-image' },
-          t('admin.bannerImage'),
-        ),
+        h('label', { class: 'field__label', for: 'banner-image' }, t('admin.bannerImage')),
         imageInput,
       ),
       h(
@@ -494,11 +532,7 @@ export async function render() {
       h(
         'div',
         { class: 'field' },
-        h(
-          'label',
-          { class: 'field__label', for: 'banner-sort' },
-          t('admin.bannerSort'),
-        ),
+        h('label', { class: 'field__label', for: 'banner-sort' }, t('admin.bannerSort')),
         sortOrderInput,
       ),
       errorBox,
@@ -510,7 +544,11 @@ export async function render() {
           { class: 'btn btn--secondary', type: 'button', onClick: () => handle.close() },
           t('common.cancel'),
         ),
-        h('button', { class: 'btn btn--primary', type: 'submit' }, banner ? t('admin.updating') : t('admin.addBanner')),
+        h(
+          'button',
+          { class: 'btn btn--primary', type: 'submit' },
+          banner ? t('admin.updating') : t('admin.addBanner'),
+        ),
       ),
     );
 
@@ -531,28 +569,7 @@ export async function render() {
     try {
       await api.admin.deleteBanner(banner.id);
       toast.success(t('admin.bannerDeleted'));
-      await refreshData();
-    } catch {
-      toast.error(t('common.genericError'));
-    }
-  }
-
-  async function refreshData() {
-    try {
-      [stats, reports, listings, banners] = await Promise.all([
-        api.admin.stats(),
-        api.admin.reports(),
-        api.admin.listings(),
-        api.admin.banners(),
-      ]);
-      statsSection.replaceChildren(
-        statCard(t('admin.statsUsers'), stats.users, 'user', 'users'),
-        statCard(t('admin.statsListings'), stats.listings, 'tag', 'listings'),
-        statCard(t('admin.statsActive'), stats.activeListings, 'zap', 'active'),
-        statCard(t('admin.statsReports'), stats.reports, 'flag', 'reports'),
-        statCard(t('admin.statsOpenReports'), stats.openReports, 'alert-circle', 'openReports'),
-        statCard(t('admin.statsBoosts'), stats.promotions, 'star', 'boosts'),
-      );
+      refresh();
     } catch {
       toast.error(t('common.genericError'));
     }

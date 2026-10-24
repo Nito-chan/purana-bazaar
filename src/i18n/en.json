@@ -61,7 +61,9 @@
     "notNow": "Not now",
     "confirm": "Confirm",
     "closeMenu": "Close menu",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "notifications": "Notifications",
+    "closeNotification": "Close notification"
   },
   "nav": {
     "home": "Home",
@@ -242,7 +244,6 @@
     "draftNote": "Your details stay on this device while you fill this in.",
     "loginTitle": "Sign in to sell",
     "loginBody": "Create a free account to publish your listing and receive messages.",
-    "photoNote": "Photos are previewed locally in the prototype. Upload and compression arrive in Phase 2.",
     "editNotFound": "You can only edit your own listings.",
     "publishError": "Couldn't publish the listing. Please try again.",
     "updateError": "Couldn't update the listing. Please try again.",
@@ -271,7 +272,6 @@
     "signup": "Create account",
     "signingUp": "Creating account…",
     "google": "Continue with Google",
-    "googleSoon": "Google sign-in arrives with the real backend in Phase 1.",
     "forgot": "Forgot password?",
     "forgotTitle": "Reset your password",
     "forgotSubtitle": "Enter your email and we'll send a reset link.",
@@ -366,7 +366,7 @@
     "emptyTitle": "No conversations yet",
     "emptyBody": "Open a listing and tap Chat. Your conversations will appear here.",
     "browse": "Find something",
-    "demoNote": "Demo chat — real-time messaging arrives in Phase 3.",
+    "demoNote": "Demo chat — messages reset when you reload.",
     "unread_one": "{count} unread",
     "unread_other": "{count} unread",
     "noMessages": "No messages yet"
@@ -439,8 +439,11 @@
   },
   "admin": {
     "title": "Admin",
-    "body": "Moderation, reports and category management arrive in Phase 5.",
+    "body": "Moderate listings, reports and banners.",
     "notAllowed": "This area is for admins only.",
+    "notAllowedBody": "Your account doesn't have moderation access. Sign in with an admin account to continue.",
+    "signInTitle": "Sign in to manage the bazaar",
+    "signInBody": "Admin tools are only available to signed-in moderators.",
     "invalidBanner": "Banner title and image are required.",
     "subtitle": "Moderate reports, listings and banners.",
     "statsUsers": "Users",
@@ -503,7 +506,7 @@
   },
   "wanted": {
     "title": "Looking for something?",
-    "body": "The Wanted board, where buyers post what they need, arrives in Phase 4.",
+    "body": "Post what you need and let nearby sellers bring it to you.",
     "action": "Browse listings"
   },
   "notFound": {

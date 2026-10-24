@@ -1,5 +1,6 @@
 import { h } from '../lib/dom.js';
 import { navigate } from '../lib/navigation.js';
+import { t } from '../i18n/index.js';
 import { icon } from './icons.js';
 
 function actionNode(action) {
@@ -51,7 +52,7 @@ export function errorState({ title, body, retryLabel, onRetry, homeLabel, showHo
   if (onRetry) {
     actions.push(
       actionNode({
-        label: retryLabel || 'Try again',
+        label: retryLabel || t('common.retry'),
         variant: 'primary',
         onClick: onRetry,
       }),
@@ -60,7 +61,7 @@ export function errorState({ title, body, retryLabel, onRetry, homeLabel, showHo
   if (showHome) {
     actions.push(
       actionNode({
-        label: homeLabel || 'Go home',
+        label: homeLabel || t('notFound.home'),
         variant: 'secondary',
         href: '/',
         onClick: () => navigate('/'),

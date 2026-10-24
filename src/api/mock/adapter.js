@@ -1424,7 +1424,9 @@ export function createMockApi() {
           const item = {
             id: newId(),
             userId: user.id,
-            reason: String(values.reason ?? '').trim().slice(0, 500),
+            reason: String(values.reason ?? '')
+              .trim()
+              .slice(0, 500),
             status: 'pending',
             requestedAt: nowIso(),
           };
@@ -1458,15 +1460,19 @@ export function createMockApi() {
         return respond(() => {
           const user = currentUser();
           if (!user.isAdmin) throw forbidden('Admin only.');
+          const now = Date.now();
           return {
             users: db.profiles.length,
             listings: db.listings.length,
-            activeListings: db.listings.filter(
-              (item) => item.status === 'active',
-            ).length,
+            activeListings: db.listings.filter((item) => effectiveStatus(item) === 'active').length,
             reports: db.reports.length,
             openReports: db.reports.filter((item) => item.status === 'open').length,
-            promotions: db.promotions.length,
+            promotions: db.promotions.filter(
+              (item) =>
+                item.status === 'active' &&
+                (!item.startsAt || new Date(item.startsAt).getTime() <= now) &&
+                new Date(item.expiresAt).getTime() > now,
+            ).length,
             payments: db.payments.length,
           };
         });
@@ -1521,7 +1527,7 @@ export function createMockApi() {
                 title: item.title,
                 sellerId: item.sellerId,
                 sellerName: seller ? seller.name : '',
-                status: item.status,
+                status: effectiveStatus(item),
                 isFeatured: item.isFeatured,
                 viewsCount: item.viewsCount,
                 contactsCount: item.contactsCount,
@@ -1571,9 +1577,13 @@ export function createMockApi() {
           if (!user.isAdmin) throw forbidden('Admin only.');
           const item = {
             id: newId(),
-            title: String(values.title ?? '').trim().slice(0, 120),
+            title: String(values.title ?? '')
+              .trim()
+              .slice(0, 120),
             imagePath: String(values.imagePath ?? '').trim(),
-            linkUrl: String(values.linkUrl ?? '').trim().slice(0, 300),
+            linkUrl: String(values.linkUrl ?? '')
+              .trim()
+              .slice(0, 300),
             cityId: values.cityId || null,
             startsAt: values.startsAt || null,
             endsAt: values.endsAt || null,

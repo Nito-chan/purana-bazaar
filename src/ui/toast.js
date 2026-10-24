@@ -1,4 +1,5 @@
 import { h } from '../lib/dom.js';
+import { t } from '../i18n/index.js';
 import { icon } from './icons.js';
 
 let region = null;
@@ -10,7 +11,7 @@ function ensureRegion() {
     class: 'toast-region',
     id: 'toast-region',
     role: 'region',
-    'aria-label': 'Notifications',
+    'aria-label': t('common.notifications'),
     'aria-live': 'polite',
     'aria-relevant': 'additions',
   });
@@ -44,7 +45,7 @@ export function toast(message, options = {}) {
     {
       class: 'toast__close',
       type: 'button',
-      'aria-label': 'Close notification',
+      'aria-label': t('common.closeNotification'),
       onClick: () => dismiss(element),
     },
     icon('x', { size: 16 }),
