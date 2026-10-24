@@ -167,6 +167,8 @@
     "activeListings_one": "{count} active listing",
     "activeListings_other": "{count} active listings",
     "rating": "{rating} rating",
+    "ratings_one": "{count} rating",
+    "ratings_other": "{count} ratings",
     "safetyTitle": "Stay safe",
     "safetyBody": "Meet in a public place and never pay in advance.",
     "soldTitle": "This item is sold",
@@ -201,6 +203,8 @@
     "boost": "Boost",
     "boostTitle": "Boost this listing",
     "boostSubtitle": "Make “{title}” stand out to more buyers.",
+    "boost7d": "7-day listing boost",
+    "boost30d": "30-day dealer boost",
     "boosted": "Listing boosted!"
   },
   "sell": {

@@ -1946,15 +1946,6 @@ body[data-page='chat'] .toast-region {
   min-height: 52px;
 }
 
-.action-bar__note {
-  grid-column: 1 / -1;
-  margin-bottom: 2px;
-  color: var(--color-muted);
-  font-size: 11px;
-  line-height: 1.35;
-  text-align: center;
-}
-
 @media (min-width: 768px) {
   .action-bar {
     position: sticky;

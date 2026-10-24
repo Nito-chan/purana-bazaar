@@ -12,7 +12,7 @@ import { absoluteUrl, currentPath, listingPath, parseListingId } from '../lib/ur
 import { conditionLabel, categoryLabel, cityLabel, t } from '../i18n/index.js';
 import { displayAttributeEntries } from '../lib/category-attributes.js';
 import { isSignedIn, loginPath, currentUser } from '../lib/auth.js';
-import { navigate } from '../lib/navigation.js';
+import { navigate, refresh } from '../lib/navigation.js';
 import { setPageTitle, setPageDescription } from '../lib/seo.js';
 import { addRecentlyViewed } from '../lib/storage.js';
 import { toggleFavourite } from '../lib/favourites.js';
@@ -89,26 +89,84 @@ export async function render({ params }) {
   const alreadyReviewed = Boolean(user) && reviews.some((r) => r.reviewerId === user.id);
   const canReview = Boolean(user) && !isMine && !alreadyReviewed;
 
-  let boostProduct = null;
-  let boostSubmitting = false;
-  let boostError = '';
-
-  async function boostListing(productId) {
-    boostSubmitting = true;
-    boostError = '';
-    try {
-      await api.promotions.create({ listingId: id, productId });
-      toast.success(t('listing.boosted'));
-      // Refresh to reflect isFeatured change.
-      window.location.reload();
-    } catch (error) {
-      boostError = (error && error.messageKey ? t(error.messageKey) : null) || t('errors.generic');
-    } finally {
-      boostSubmitting = false;
-    }
-  }
-
   function openBoostSheet() {
+    let selectedProduct = null;
+    let submitting = false;
+    const errorBox = h('div', { role: 'alert' });
+    const optionButtons = new Map();
+
+    function refreshOptions() {
+      for (const [productId, option] of optionButtons) {
+        const active = productId === selectedProduct;
+        option.button.classList.toggle('boost-option--selected', active);
+        option.button.setAttribute('aria-pressed', String(active));
+        option.check.hidden = !active;
+      }
+      submitButton.disabled = !selectedProduct || submitting;
+    }
+
+    function boostOption(productId, labelKey, price) {
+      const check = h(
+        'span',
+        { class: 'boost-option__check', hidden: true },
+        icon('check', { size: 16 }),
+      );
+      const button = h(
+        'button',
+        {
+          class: 'boost-option',
+          type: 'button',
+          'aria-pressed': 'false',
+          onClick: () => {
+            selectedProduct = productId;
+            refreshOptions();
+          },
+        },
+        h('span', { class: 'boost-option__name' }, t(labelKey)),
+        h('span', { class: 'boost-option__price' }, price),
+        check,
+      );
+      optionButtons.set(productId, { button, check });
+      return button;
+    }
+
+    const submitButton = h(
+      'button',
+      {
+        class: 'btn btn--primary',
+        type: 'button',
+        disabled: true,
+        onClick: async () => {
+          if (!selectedProduct || submitting) return;
+          submitting = true;
+          errorBox.replaceChildren();
+          submitButton.textContent = t('common.saving');
+          refreshOptions();
+          try {
+            await api.promotions.create({ listingId: id, productId: selectedProduct });
+            toast.success(t('listing.boosted'));
+            handle.close();
+            refresh();
+          } catch (error) {
+            const message =
+              (error && error.messageKey ? t(error.messageKey) : null) || t('errors.generic');
+            errorBox.replaceChildren(
+              h(
+                'p',
+                { class: 'field__error' },
+                icon('alert-circle', { size: 16 }),
+                h('span', {}, message),
+              ),
+            );
+            submitting = false;
+            submitButton.textContent = t('listing.boost');
+            refreshOptions();
+          }
+        },
+      },
+      t('listing.boost'),
+    );
+
     const sheetContent = h(
       'div',
       { class: 'boost-sheet' },
@@ -120,41 +178,10 @@ export async function render({ params }) {
       h(
         'div',
         { class: 'boost-options' },
-        h(
-          'button',
-          {
-            class: `boost-option${boostProduct === 'boost-7d' ? ' boost-option--selected' : ''}`,
-            type: 'button',
-            onClick: () => {
-              boostProduct = 'boost-7d';
-            },
-          },
-          h('span', { class: 'boost-option__name' }, '7-day listing boost'),
-          h('span', { class: 'boost-option__price' }, '₹49'),
-          boostProduct === 'boost-7d' ? h('span', { class: 'boost-option__check' }, icon('check', { size: 16 })) : null,
-        ),
-        h(
-          'button',
-          {
-            class: `boost-option${boostProduct === 'dealer-30d' ? ' boost-option--selected' : ''}`,
-            type: 'button',
-            onClick: () => {
-              boostProduct = 'dealer-30d';
-            },
-          },
-          h('span', { class: 'boost-option__name' }, '30-day dealer boost'),
-          h('span', { class: 'boost-option__price' }, '₹199'),
-          boostProduct === 'dealer-30d' ? h('span', { class: 'boost-option__check' }, icon('check', { size: 16 })) : null,
-        ),
+        boostOption('boost-7d', 'listing.boost7d', '₹49'),
+        boostOption('dealer-30d', 'listing.boost30d', '₹199'),
       ),
-      boostError
-        ? h(
-            'p',
-            { class: 'field__error' },
-            icon('alert-circle', { size: 16 }),
-            h('span', {}, boostError),
-          )
-        : null,
+      errorBox,
       h(
         'div',
         { class: 'form__actions' },
@@ -163,19 +190,7 @@ export async function render({ params }) {
           { class: 'btn btn--secondary', type: 'button', onClick: () => handle.close() },
           t('common.cancel'),
         ),
-        h(
-          'button',
-          {
-            class: 'btn btn--primary',
-            type: 'button',
-            disabled: !boostProduct || boostSubmitting,
-            onClick: () => {
-              handle.close();
-              boostListing(boostProduct);
-            },
-          },
-          boostSubmitting ? t('common.saving') : t('listing.boost'),
-        ),
+        submitButton,
       ),
     );
 
@@ -323,7 +338,6 @@ export async function render({ params }) {
                 {
                   class: 'btn btn--accent btn--block',
                   type: 'button',
-                  disabled: boostSubmitting,
                   onClick: () => openBoostSheet(),
                 },
                 icon('zap', { size: 18 }),
@@ -343,7 +357,6 @@ export async function render({ params }) {
       ? h(
           'div',
           { class: 'action-bar', role: 'group', 'aria-label': t('listing.contactSeller') },
-          h('p', { class: 'action-bar__note' }, t('listing.safetyBody')),
           contactActions(),
         )
       : active && isMine
@@ -366,7 +379,6 @@ export async function render({ params }) {
                   {
                     class: 'btn btn--accent',
                     type: 'button',
-                    disabled: boostSubmitting,
                     onClick: () => openBoostSheet(),
                   },
                   icon('zap', { size: 18 }),
@@ -444,11 +456,11 @@ export async function render({ params }) {
           h(
             'div',
             {},
-            h('div', { class: 'seller-stat__value' }, String(seller.ratingCount || 0)),
+            h('div', { class: 'seller-stat__value' }, seller.rating.toFixed(1)),
             h(
               'div',
               { class: 'seller-stat__label' },
-              t('listing.rating', { rating: seller.rating.toFixed(1) }),
+              t('listing.ratings', { count: seller.ratingCount || 0 }),
             ),
           ),
         ),
@@ -541,7 +553,7 @@ export async function render({ params }) {
             'div',
             { class: 'detail-meta' },
             icon('map-pin', { size: 15 }),
-            h('span', {}, listing.area),
+            h('span', {}, listing.area || cityLabel(listing.city)),
             h('span', { class: 'meta-row__sep', 'aria-hidden': 'true' }),
             icon('clock', { size: 15 }),
             h(

@@ -167,6 +167,8 @@
     "activeListings_one": "{count} सक्रिय लिस्टिंग",
     "activeListings_other": "{count} सक्रिय लिस्टिंग",
     "rating": "{rating} रेटिंग",
+    "ratings_one": "{count} रेटिंग",
+    "ratings_other": "{count} रेटिंग",
     "safetyTitle": "सुरक्षा रखें",
     "safetyBody": "सार्वजनिक जगह पर मिलें और पैसे एडवांस न दें।",
     "soldTitle": "यह चीज़ बिक गई",
@@ -201,6 +203,8 @@
     "boost": "बूस्ट करें",
     "boostTitle": "इस लिस्टिंग को बूस्ट करें",
     "boostSubtitle": "“{title}” को ज़्यादा खरीदारों तक पहुंचाएं।",
+    "boost7d": "7 दिन की लिस्टिंग बूस्ट",
+    "boost30d": "30 दिन की डीलर बूस्ट",
     "boosted": "लिस्टिंग बूस्ट हो गई!"
   },
   "sell": {
