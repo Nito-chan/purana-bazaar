@@ -480,6 +480,9 @@ export function render() {
         feed.replaceChildren(...items.map((item) => listingCard(item)));
       }
 
+      // Clear the busy flag before painting the sentinel, otherwise the
+      // "Load more" button stays disabled and labelled "Loading…".
+      loading = false;
       renderSentinel();
       if (nextCursor) {
         observer.unobserve(sentinel);

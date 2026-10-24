@@ -280,16 +280,18 @@ dialog {
 }
 
 @media (min-width: 768px) {
-  .desktop-only {
-    display: initial !important;
-  }
-
   .mobile-only {
     display: none !important;
   }
 
   .page {
     padding-block: var(--space-8) var(--space-16);
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: initial !important;
   }
 }
 
