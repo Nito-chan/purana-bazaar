@@ -576,7 +576,9 @@
     "rights": "© {year} Purana Bazaar",
     "safety": "Safety",
     "terms": "Terms",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "credits": "Photo credits",
+    "legalNav": "Legal and credits"
   },
   "city": {
     "title": "Choose your city",
@@ -746,6 +748,15 @@
     "securityBody": "We implement reasonable security measures to protect your information, but no internet transmission is completely secure.",
     "contact": "Contact Us",
     "contactBody": "If you have privacy questions, please contact us through the app."
+  },
+  "credits": {
+    "title": "Photo credits",
+    "subtitle": "Where the demo listing photos come from.",
+    "note": "Photos are cropped to a square, resized to 800 × 800, and converted to WebP for this demo. CC BY and CC BY-SA images are used with attribution under their original licenses; cropped versions are shared under the same license.",
+    "listings": "Listing photos",
+    "categories": "Category photos",
+    "viewSource": "View source",
+    "back": "Browse listings"
   },
   "accountDelete": {
     "title": "Account Deletion",

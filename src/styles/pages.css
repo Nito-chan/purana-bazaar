@@ -1989,3 +1989,71 @@ body[data-page='listing'][data-action-bar='true'] .bottom-nav {
   width: 20px;
   height: 20px;
 }
+
+/* ---------- Photo credits ---------- */
+.credits-page {
+  max-width: 1040px;
+}
+
+.credits-note {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.credits-section {
+  margin-top: var(--space-6);
+}
+
+.credits-section__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.credits-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credit-item {
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.credit-item__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.credit-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.credit-item__meta a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.credit-item__meta a:hover {
+  color: var(--color-ink);
+}
+
+@media (min-width: 900px) {
+  .credits-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-6);
+  }
+}

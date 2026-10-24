@@ -74,6 +74,11 @@ const routes = [
     load: () => import('./pages/privacy.js'),
   },
   {
+    name: 'credits',
+    pattern: /^\/credits\/?$/,
+    load: () => import('./pages/credits.js'),
+  },
+  {
     name: 'accountDelete',
     pattern: /^\/account\/delete\/?$/,
     load: () => import('./pages/account-delete.js'),

@@ -1,4 +1,5 @@
 import { DEFAULT_ATTRIBUTE_SCHEMAS } from '../../lib/category-attributes.js';
+import { listingPhoto } from './photos.js';
 
 const CATEGORIES = [
   { id: 'cat-mobiles', slug: 'mobiles', nameEn: 'Mobiles', nameHi: 'मोबाइल', sortOrder: 1 },
@@ -217,7 +218,7 @@ const LISTING_ROWS = [
     views: 142,
     contacts: 9,
     featured: true,
-    imageCount: 3,
+    photo: 'iphone-11',
     attributes: { Brand: 'Apple', Storage: '64 GB', 'Battery health': '86%', Box: 'Yes' },
   },
   {
@@ -235,7 +236,7 @@ const LISTING_ROWS = [
     ageHours: 22,
     views: 88,
     contacts: 5,
-    imageCount: 2,
+    photo: 'samsung-galaxy-m32',
     attributes: { Brand: 'Samsung', Storage: '128 GB', RAM: '6 GB', Box: 'Yes' },
   },
   {
@@ -253,7 +254,7 @@ const LISTING_ROWS = [
     ageHours: 48,
     views: 61,
     contacts: 2,
-    imageCount: 2,
+    photo: 'redmi-note-10',
     attributes: { Brand: 'Redmi', Storage: '64 GB', Screen: 'Cracked' },
   },
   {
@@ -271,7 +272,7 @@ const LISTING_ROWS = [
     ageHours: 72,
     views: 44,
     contacts: 3,
-    imageCount: 2,
+    photo: 'oneplus-nord-ce-2',
     attributes: { Brand: 'OnePlus', Storage: '128 GB', RAM: '8 GB' },
   },
   {
@@ -290,7 +291,7 @@ const LISTING_ROWS = [
     views: 203,
     contacts: 14,
     featured: true,
-    imageCount: 3,
+    photo: 'hp-pavilion-15',
     attributes: { Brand: 'HP', Processor: 'Intel i5 10th gen', RAM: '8 GB', Storage: '512 GB SSD' },
   },
   {
@@ -308,7 +309,7 @@ const LISTING_ROWS = [
     ageHours: 50,
     views: 79,
     contacts: 4,
-    imageCount: 2,
+    photo: 'dell-inspiron-15',
     attributes: { Brand: 'Dell', Processor: 'Intel i3 8th gen', RAM: '8 GB', Storage: '1 TB HDD' },
   },
   {
@@ -326,7 +327,7 @@ const LISTING_ROWS = [
     ageHours: 96,
     views: 310,
     contacts: 21,
-    imageCount: 3,
+    photo: 'macbook-air-2019',
     attributes: { Brand: 'Apple', Processor: 'Intel Core i5', RAM: '8 GB', Storage: '128 GB SSD' },
   },
   {
@@ -345,7 +346,7 @@ const LISTING_ROWS = [
     views: 120,
     contacts: 8,
     status: 'sold',
-    imageCount: 2,
+    photo: 'lenovo-thinkpad-t470',
     attributes: { Brand: 'Lenovo', Processor: 'Intel i5', RAM: '8 GB', Storage: '256 GB SSD' },
   },
   {
@@ -363,7 +364,7 @@ const LISTING_ROWS = [
     ageHours: 24,
     views: 97,
     contacts: 6,
-    imageCount: 2,
+    photo: 'wooden-double-bed',
     attributes: { Material: 'Sheesham wood', Size: '6 x 5 ft', Mattress: 'Included' },
   },
   {
@@ -381,7 +382,7 @@ const LISTING_ROWS = [
     ageHours: 72,
     views: 58,
     contacts: 3,
-    imageCount: 2,
+    photo: 'fabric-sofa',
     attributes: { Material: 'Fabric', Seats: '3', Colour: 'Grey' },
   },
   {
@@ -399,7 +400,7 @@ const LISTING_ROWS = [
     ageHours: 6,
     views: 31,
     contacts: 2,
-    imageCount: 1,
+    photo: 'study-table',
     attributes: { Material: 'Engineered wood', Drawers: '2', Size: '3 x 2 ft' },
   },
   {
@@ -418,7 +419,7 @@ const LISTING_ROWS = [
     views: 156,
     contacts: 10,
     featured: true,
-    imageCount: 2,
+    photo: 'godrej-fridge',
     attributes: { Brand: 'Godrej', Capacity: '190 L', Type: 'Single door' },
   },
   {
@@ -436,7 +437,7 @@ const LISTING_ROWS = [
     ageHours: 44,
     views: 188,
     contacts: 12,
-    imageCount: 2,
+    photo: 'lg-smart-tv',
     attributes: { Brand: 'LG', Size: '43 inch', Smart: 'Yes', 'Wall mount': 'Included' },
   },
   {
@@ -454,7 +455,7 @@ const LISTING_ROWS = [
     ageHours: 92,
     views: 84,
     contacts: 5,
-    imageCount: 2,
+    photo: 'samsung-washing-machine',
     attributes: { Brand: 'Samsung', Capacity: '6.5 kg', Type: 'Top load' },
   },
   {
@@ -472,7 +473,7 @@ const LISTING_ROWS = [
     ageHours: 140,
     views: 66,
     contacts: 4,
-    imageCount: 2,
+    photo: 'voltas-split-ac',
     attributes: { Brand: 'Voltas', Capacity: '1.5 ton', Type: 'Split' },
   },
   {
@@ -491,7 +492,7 @@ const LISTING_ROWS = [
     views: 420,
     contacts: 28,
     featured: true,
-    imageCount: 3,
+    photo: 'royal-enfield-classic-350',
     attributes: { Year: '2019', 'KM driven': '32,000 km', Owner: 'First', Insurance: 'Valid' },
   },
   {
@@ -509,7 +510,7 @@ const LISTING_ROWS = [
     ageHours: 28,
     views: 190,
     contacts: 11,
-    imageCount: 2,
+    photo: 'honda-activa-6g',
     attributes: { Year: '2022', 'KM driven': '11,500 km', Owner: 'First' },
   },
   {
@@ -527,7 +528,7 @@ const LISTING_ROWS = [
     ageHours: 120,
     views: 145,
     contacts: 7,
-    imageCount: 2,
+    photo: 'bajaj-pulsar-150',
     attributes: { Year: '2017', 'KM driven': '48,000 km', Owner: 'Second' },
   },
   {
@@ -545,7 +546,7 @@ const LISTING_ROWS = [
     ageHours: 7,
     views: 72,
     contacts: 4,
-    imageCount: 2,
+    photo: 'hero-sprint-cycle',
     attributes: { Brand: 'Hero', Gears: '21', Frame: 'M' },
   },
   {
@@ -563,7 +564,7 @@ const LISTING_ROWS = [
     ageHours: 70,
     views: 38,
     contacts: 2,
-    imageCount: 1,
+    photo: 'bsa-ladybird-cycle',
     attributes: { Brand: 'BSA', Gears: 'Single speed', Basket: 'Included' },
   },
   {
@@ -581,7 +582,7 @@ const LISTING_ROWS = [
     views: 52,
     contacts: 6,
     status: 'sold',
-    imageCount: 1,
+    photo: 'kids-cycle',
     attributes: { Size: '16 inch', Age: '4–7 years' },
   },
   {
@@ -599,7 +600,7 @@ const LISTING_ROWS = [
     ageHours: 48,
     views: 29,
     contacts: 1,
-    imageCount: 2,
+    photo: 'engineering-books',
     attributes: { Subject: 'Engineering', Books: '6', Language: 'English' },
   },
   {
@@ -617,7 +618,7 @@ const LISTING_ROWS = [
     ageHours: 9,
     views: 41,
     contacts: 3,
-    imageCount: 1,
+    photo: 'ncert-books',
     attributes: { Class: '10', Subjects: 'All', Language: 'English' },
   },
   {
@@ -635,7 +636,7 @@ const LISTING_ROWS = [
     ageHours: 26,
     views: 55,
     contacts: 4,
-    imageCount: 1,
+    photo: 'mixer-grinder',
     attributes: { Brand: 'Bajaj', Power: '750 W', Jars: '3' },
   },
   {
@@ -653,7 +654,7 @@ const LISTING_ROWS = [
     ageHours: 110,
     views: 33,
     contacts: 2,
-    imageCount: 1,
+    photo: 'pressure-cooker',
     attributes: { Pieces: '3', Material: 'Aluminium' },
   },
   {
@@ -671,7 +672,7 @@ const LISTING_ROWS = [
     ageHours: 11,
     views: 64,
     contacts: 4,
-    imageCount: 2,
+    photo: 'dining-table',
     attributes: { Material: 'Wood', Seats: '4', Chairs: 'Included' },
   },
   {
@@ -689,7 +690,7 @@ const LISTING_ROWS = [
     ageHours: 6,
     views: 47,
     contacts: 3,
-    imageCount: 1,
+    photo: 'jbl-go-3',
     attributes: { Brand: 'JBL', Model: 'Go 3', Bluetooth: 'Yes' },
   },
   {
@@ -707,7 +708,7 @@ const LISTING_ROWS = [
     ageHours: 66,
     views: 176,
     contacts: 10,
-    imageCount: 3,
+    photo: 'canon-eos-200d',
     attributes: { Brand: 'Canon', Model: 'EOS 200D', Lens: '18–55mm', Bag: 'Included' },
   },
   {
@@ -725,7 +726,7 @@ const LISTING_ROWS = [
     views: 90,
     contacts: 7,
     status: 'sold',
-    imageCount: 1,
+    photo: 'dumbbells',
     attributes: { Weight: '20 kg pair', Type: 'Rubber coated' },
   },
   {
@@ -743,7 +744,7 @@ const LISTING_ROWS = [
     ageHours: 2160,
     views: 1,
     contacts: 0,
-    imageCount: 1,
+    photo: 'xss-safety-check',
     attributes: { Note: '<img src=x onerror="window.__xss=3">' },
   },
   {
@@ -761,7 +762,7 @@ const LISTING_ROWS = [
     ageHours: 30,
     views: 23,
     contacts: 1,
-    imageCount: 2,
+    photo: 'steel-almirah',
     attributes: { Material: 'Steel', Doors: '2', Locker: 'Yes' },
   },
   {
@@ -779,7 +780,7 @@ const LISTING_ROWS = [
     views: 36,
     contacts: 4,
     status: 'sold',
-    imageCount: 1,
+    photo: 'mi-band-5',
     attributes: { Brand: 'Xiaomi', Model: 'Mi Band 5' },
   },
   {
@@ -798,7 +799,7 @@ const LISTING_ROWS = [
     views: 12,
     contacts: 0,
     status: 'expired',
-    imageCount: 1,
+    photo: 'cambridge-dictionary',
     attributes: { Type: 'Dictionary', Language: 'English' },
   },
 ];
@@ -827,6 +828,7 @@ export function createSeed() {
     }
 
     const expired = row.status === 'expired';
+    const photo = listingPhoto(row.photo, row.title);
     return {
       id: row.id,
       title: row.title,
@@ -846,8 +848,8 @@ export function createSeed() {
       bumpedAt: hoursAgo(row.ageHours),
       expiresAt: expired ? daysAgo(2) : daysAgo(-30),
       attributes: { ...(row.attributes || {}) },
-      imageCount: row.imageCount || 1,
-      images: row.images || null,
+      imageCount: photo ? 1 : 0,
+      images: photo ? [photo] : null,
       variant: index,
     };
   });

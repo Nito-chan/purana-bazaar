@@ -1,7 +1,7 @@
 import { ApiError, authRequired, forbidden, notFound } from '../errors.js';
 import { matchesQuery } from '../../lib/search.js';
 import { createSeed } from './seed.js';
-import { placeholderImages } from './placeholder.js';
+import { fallbackImages } from './photos.js';
 
 const seed = createSeed();
 const DEMO_USER_ID = '11111111-1111-4111-8111-000000000007';
@@ -176,10 +176,10 @@ function galleryFor(listing, category) {
     }));
 
   if (images.length) return images;
-  return placeholderImages(
-    { ...listing, category: category || { slug: 'other', nameEn: 'Other' } },
-    Math.max(1, Math.min(Number(listing.imageCount) || 1, 5)),
-  );
+  return fallbackImages({
+    ...listing,
+    category: category || { slug: 'other', nameEn: 'Other' },
+  });
 }
 
 function attributesFor(listing) {

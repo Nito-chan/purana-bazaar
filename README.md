@@ -21,6 +21,10 @@ Password: demo1234
 
 The sign-in page also has a **Use the demo account** button.
 
+Demo listing photos are real CC0 and Creative Commons photos stored in `public/demo`.
+Open `/credits` in the app for the full attribution list; the sources and licences
+are also recorded in `src/lib/photo-credits.js`.
+
 Mock data resets when the page reloads. Only the selected city, language, sell draft, recently
 viewed items and dismissed banners persist in `localStorage`.
 

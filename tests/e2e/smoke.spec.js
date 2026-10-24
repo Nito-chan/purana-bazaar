@@ -13,8 +13,17 @@ test.describe('public routes', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: /Fresh in Khargone/ })).toBeVisible();
     await expect(page.locator('.listing-card').first()).toBeVisible();
+    await expect(page.locator('.listing-card__media img').first()).toHaveAttribute(
+      'src',
+      /\/demo\/listings\/thumbs\//,
+    );
     await expectNoHorizontalOverflow(page);
     await expectNoBrokenImages(page);
+
+    await page.goto('/credits');
+    await expect(page.getByRole('heading', { level: 1, name: 'Photo credits' })).toBeVisible();
+    await expect(page.locator('.credit-item')).toHaveCount(42);
+    await expectNoHorizontalOverflow(page);
 
     await page.goto('/khargone/mobiles');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Mobiles in Khargone');

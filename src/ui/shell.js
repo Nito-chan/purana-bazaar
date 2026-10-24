@@ -200,6 +200,13 @@ export function createFooter() {
         {},
         h('p', { class: 'strong' }, t('footer.tagline')),
         h('p', { class: 'text-xs text-muted' }, t('footer.madeFor')),
+        h(
+          'nav',
+          { class: 'site-footer__links', 'aria-label': t('footer.legalNav') },
+          h('a', { href: '/terms' }, t('footer.terms')),
+          h('a', { href: '/privacy' }, t('footer.privacy')),
+          config.useMock ? h('a', { href: '/credits' }, t('footer.credits')) : null,
+        ),
       ),
       config.useMock ? h('p', { class: 'text-xs text-muted' }, t('footer.demo')) : null,
       h(

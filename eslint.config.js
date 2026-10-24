@@ -54,7 +54,7 @@ export default [
     },
   },
   {
-    files: ['src/ui/icons.js', 'src/api/mock/placeholder.js'],
+    files: ['src/ui/icons.js'],
     rules: {
       'no-restricted-syntax': 'off',
     },

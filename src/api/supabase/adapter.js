@@ -1,5 +1,5 @@
 import { ApiError, authRequired, forbidden, notFound } from '../errors.js';
-import { placeholderImages } from '../mock/placeholder.js';
+import { fallbackImages } from '../mock/photos.js';
 import { supabase } from './client.js';
 
 const MAX_PHOTOS = 5;
@@ -156,10 +156,10 @@ function galleryFor(listing) {
 
   if (images.length) return images;
 
-  return placeholderImages(
-    { ...listing, category: listing.category || { slug: 'other', nameEn: 'Other' } },
-    Math.max(1, Math.min(Number(listing.imageCount) || 1, 5)),
-  );
+  return fallbackImages({
+    ...listing,
+    category: listing.category || { slug: 'other', nameEn: 'Other' },
+  });
 }
 
 function decorateListing(listing) {
@@ -172,7 +172,7 @@ function decorateListing(listing) {
     category: listing.category || null,
     city: listing.city || null,
     images,
-    imageCount: Math.max(Number(listing.imageCount) || 0, images.length),
+    imageCount: images.length,
     attributes: attributesFor(listing.attributes),
     isFavourite: Boolean(listing.isFavourite),
     isMine: Boolean(listing.isMine),
@@ -1030,7 +1030,9 @@ export function createSupabaseApi() {
         await currentUserId();
         const { data, error } = await supabase
           .from('promotions')
-          .select('id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at')
+          .select(
+            'id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at',
+          )
           .eq('user_id', (await supabase.auth.getSession()).data.session?.user.id)
           .order('created_at', { ascending: false });
         if (error) throw toApiError(error, 'errors.loadFailed');
@@ -1057,7 +1059,11 @@ export function createSupabaseApi() {
           .single();
         if (listingError || !listing) throw notFound('Listing not found.');
         if (listing.seller_id !== (await supabase.auth.getSession()).data.session?.user.id) {
-          throw new ApiError('NOT_OWNER', 'You can only boost your own listings.', 'promotions.notOwner');
+          throw new ApiError(
+            'NOT_OWNER',
+            'You can only boost your own listings.',
+            'promotions.notOwner',
+          );
         }
 
         // Verify the product exists and is active.
@@ -1078,7 +1084,11 @@ export function createSupabaseApi() {
           .gt('expires_at', new Date().toISOString())
           .maybeSingle();
         if (existing) {
-          throw new ApiError('ALREADY_BOOSTED', 'This listing already has an active boost.', 'promotions.alreadyBoosted');
+          throw new ApiError(
+            'ALREADY_BOOSTED',
+            'This listing already has an active boost.',
+            'promotions.alreadyBoosted',
+          );
         }
 
         // Create payment record.
@@ -1112,15 +1122,14 @@ export function createSupabaseApi() {
             starts_at: now.toISOString(),
             expires_at: expiresAt,
           })
-          .select('id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at')
+          .select(
+            'id, user_id, listing_id, product_id, payment_id, status, starts_at, expires_at, created_at',
+          )
           .single();
         if (promotionError) throw toApiError(promotionError, 'errors.saveFailed');
 
         // Mark the listing as featured while the boost is active.
-        await supabase
-          .from('listings')
-          .update({ is_featured: true })
-          .eq('id', values.listingId);
+        await supabase.from('listings').update({ is_featured: true }).eq('id', values.listingId);
 
         return {
           id: promotion.id,
@@ -1216,7 +1225,11 @@ export function createSupabaseApi() {
           .maybeSingle();
         if (existingError) throw toApiError(existingError, 'errors.loadFailed');
         if (existing) {
-          throw new ApiError('PENDING_DELETION', 'You already have a pending deletion request.', 'accountDeletionRequests.pendingDeletion');
+          throw new ApiError(
+            'PENDING_DELETION',
+            'You already have a pending deletion request.',
+            'accountDeletionRequests.pendingDeletion',
+          );
         }
 
         const { data, error } = await supabase
@@ -1287,7 +1300,9 @@ export function createSupabaseApi() {
         await currentUserId();
         const { data, error } = await supabase
           .from('reports')
-          .select('id, reporter_id, reason, status, details, created_at, reporter:profiles(name), target_listing_id, target_user_id')
+          .select(
+            'id, reporter_id, reason, status, details, created_at, reporter:profiles(name), target_listing_id, target_user_id',
+          )
           .order('created_at', { ascending: false });
         if (error) throw toApiError(error, 'errors.loadFailed');
         return (Array.isArray(data) ? data : []).map((item) => ({
@@ -1324,7 +1339,9 @@ export function createSupabaseApi() {
         await currentUserId();
         const { data, error } = await supabase
           .from('listings')
-          .select('id, title, seller_id, status, is_featured, views_count, contacts_count, created_at, expires_at, seller:profiles(name)')
+          .select(
+            'id, title, seller_id, status, is_featured, views_count, contacts_count, created_at, expires_at, seller:profiles(name)',
+          )
           .order('created_at', { ascending: false });
         if (error) throw toApiError(error, 'errors.loadFailed');
         return (Array.isArray(data) ? data : []).map((item) => ({
@@ -1357,7 +1374,9 @@ export function createSupabaseApi() {
         await currentUserId();
         const { data, error } = await supabase
           .from('banners')
-          .select('id, title, image_path, link_url, city_id, starts_at, ends_at, is_active, sort_order')
+          .select(
+            'id, title, image_path, link_url, city_id, starts_at, ends_at, is_active, sort_order',
+          )
           .order('sort_order', { ascending: true });
         if (error) throw toApiError(error, 'errors.loadFailed');
         return (Array.isArray(data) ? data : []).map((item) => ({
